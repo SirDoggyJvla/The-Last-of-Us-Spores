@@ -1,0 +1,9 @@
+name=The Last of Us Spores
+id=TLOU_Spores
+description=The Last of Us Spores aims to add spore mechanics from The Last of Us in Project Zomboid.
+poster=poster.png
+authors=SirDoggyJvla
+icon=spore_icon.png
+url=https://ko-fi.com/sirdoggyjvla
+versionMin=42.0
+require=\TargetSquareOnLoad,\StarlitLibrary,\DoggyAPI

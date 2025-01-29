@@ -1,0 +1,5 @@
+version=1
+title=The Last of Us Spores
+description=
+tags=Build 42;Misc;Pop Culture
+visibility=public

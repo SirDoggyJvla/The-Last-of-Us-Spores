@@ -1,0 +1,55 @@
+VERSION = 1,
+
+/*---------------------------------------------------------------------
+-- SPORE ZONE SCALE AND GENERAL CHANCE
+---------------------------------------------------------------------*/
+option TLOU_Spores.NoiseMapScale
+{
+	type = integer, 
+	min = 8, 
+	max = 10000, 
+	default = 200,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_NoiseMapScale,
+}
+
+/*---------------------------------------------------------------------
+-- CUSTOM SEEDS
+---------------------------------------------------------------------*/
+option TLOU_Spores.CustomSeeds
+{
+	type = boolean,
+	default = false,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_CustomSeeds,
+}
+
+option TLOU_Spores.x_seed
+{
+	type = integer, 
+	min = 50000, 
+	max = 500000, 
+	default = 69696,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_x_seed,
+}
+
+option TLOU_Spores.y_seed
+{
+	type = integer, 
+	min = 50000, 
+	max = 500000, 
+	default = 420666,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_y_seed,
+}
+
+option TLOU_Spores.other_seed
+{
+	type = integer, 
+	min = 50000, 
+	max = 500000, 
+	default = 123456,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_other_seed,
+}
