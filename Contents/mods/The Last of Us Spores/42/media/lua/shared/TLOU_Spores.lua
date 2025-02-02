@@ -15,6 +15,8 @@ Core file of TLOU Spores.
 -- module
 local TLOU_Spores = require "TLOU_Spores_module"
 require "TLOU_Spores_tools"
+local DoggyAPI = require "DoggyAPI_module"
+local DoggyAPI_WORLD = DoggyAPI.WORLD
 
 -- coordinates to check
 local CHECK_COORDINATES = {}
@@ -23,13 +25,16 @@ local CHECK_COORDINATES = {}
 local isDebug = isDebugEnabled()
 
 -- game loaded caching
-local MODDATA_SPORES_CHUNKS
 local MODDATA_SPORES_BUILDINGS
 local MODDATA_SPORES_SEEDS
 local MODDATA_SPORES_ROOMS
 
 ---Used to cache some stuff on startup
 TLOU_Spores.OnInitGlobalModData = function()
+    -- reset mod data to current save
+    MODDATA_SPORES_BUILDINGS = ModData.getOrCreate("TLOU_Spores_buildings")
+    MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
+
     --- PERSISTENT DATA
     MODDATA_SPORES_SEEDS = MODDATA_SPORES_SEEDS or ModData.getOrCreate("TLOU_Spores_seeds")
 
@@ -37,7 +42,7 @@ TLOU_Spores.OnInitGlobalModData = function()
     if MODDATA_SPORES_SEEDS["x_seed"] then
         TLOU_Spores.SEEDS.x_seed = MODDATA_SPORES_SEEDS["x_seed"]
         TLOU_Spores.SEEDS.y_seed = MODDATA_SPORES_SEEDS["y_seed"]
-        TLOU_Spores.SEEDS.other_seed = MODDATA_SPORES_SEEDS["other_seed"]
+        TLOU_Spores.SEEDS.offset_seed = MODDATA_SPORES_SEEDS["offset_seed"]
     end
 
     --- SCALE
@@ -48,27 +53,27 @@ TLOU_Spores.OnInitGlobalModData = function()
 end
 
 ---Used to initialize the seeds for this map, either by user input or randomness.
-TLOU_Spores.OnNewGame  = function()
+TLOU_Spores.OnNewGame = function()
     MODDATA_SPORES_SEEDS = MODDATA_SPORES_SEEDS or ModData.getOrCreate("TLOU_Spores_seeds")
 
     --- USER SEED
     if SandboxVars.TLOU_Spores.CustomSeeds then
         MODDATA_SPORES_SEEDS["x_seed"] = SandboxVars.TLOU_Spores.x_seed
         MODDATA_SPORES_SEEDS["y_seed"] = SandboxVars.TLOU_Spores.y_seed
-        MODDATA_SPORES_SEEDS["other_seed"] = SandboxVars.TLOU_Spores.other_seed
+        MODDATA_SPORES_SEEDS["offset_seed"] = SandboxVars.TLOU_Spores.offset_seed
 
     --- GENERATE RANDOM SEEDS
     else
         local random = newrandom()
         MODDATA_SPORES_SEEDS["x_seed"] = random:random(50000,500000)
         MODDATA_SPORES_SEEDS["y_seed"] = random:random(50000,500000)
-        MODDATA_SPORES_SEEDS["other_seed"] = random:random(50000,500000)
+        MODDATA_SPORES_SEEDS["offset_seed"] = random:random(50000,500000)
     end
 
     -- init mod data loads before OnNewGame, so load these here
     TLOU_Spores.SEEDS.x_seed = MODDATA_SPORES_SEEDS["x_seed"]
     TLOU_Spores.SEEDS.y_seed = MODDATA_SPORES_SEEDS["y_seed"]
-    TLOU_Spores.SEEDS.other_seed = MODDATA_SPORES_SEEDS["other_seed"]
+    TLOU_Spores.SEEDS.offset_seed = MODDATA_SPORES_SEEDS["offset_seed"]
 end
 
 
@@ -77,42 +82,27 @@ end
 --- LOADING CHUNK ---
 --[[ ================================================ ]]--
 
----Check which chunk needs to be loaded
+---Whenever a new chunk gets loaded in
 ---@param chunk any
-TLOU_Spores.LoadChunk = function(chunk)
-    MODDATA_SPORES_CHUNKS = MODDATA_SPORES_CHUNKS or ModData.getOrCreate("TLOU_Spores_chunks")
-
-    -- verify chunk wasn't already loaded
-    local chunkID = tostring(chunk.wx).."x"..tostring(chunk.wy)
-    if MODDATA_SPORES_CHUNKS[chunkID] then return end
-
+TLOU_Spores.LoadNewChunk = function(chunk)
     -- check 4 squares in the chunk, which should be more than enough to catch any building
     local SQUARE_SKIP_DISTANCE = TLOU_Spores.SQUARE_SKIP_DISTANCE
+    local CHUNK_MIN_LEVEL,CHUNK_MAX_LEVEL = chunk:getMinLevel(),chunk:getMaxLevel()
     for i_x = 0, 7, SQUARE_SKIP_DISTANCE do
         for i_y = 0, 7, SQUARE_SKIP_DISTANCE do
-            for i_z = chunk:getMinLevel(), chunk:getMaxLevel() do
+            for i_z = CHUNK_MIN_LEVEL, CHUNK_MAX_LEVEL do
                 table.insert(CHECK_COORDINATES, {chunk=chunk,x=i_x,y=i_y,z=i_z})
-
-                -- TLOU_Spores.OnTick(0) -- used for debugging to force load quickly
-                MODDATA_SPORES_CHUNKS[chunkID] = true -- don't check that chunk anymore
             end
         end
     end
 end
 
 TLOU_Spores.OnTick = function(ticks)
-
-    -- check for player in spore zone
-    if ticks%10 == 0 then -- check not too often
-
-        -- access the player room
-        local roomDef = getPlayer():getCurrentRoomDef()
-        if roomDef then
-            local roomID = TLOU_Spores.GetRoomID(roomDef)
-            MODDATA_SPORES_ROOMS = MODDATA_SPORES_ROOMS or ModData.getOrCreate("TLOU_Spores_rooms")
-
-            -- check if player is in a spore zone
-            local inSporeZone = MODDATA_SPORES_ROOMS[roomID]
+    -- update player in spore zone status
+    if ticks % 10 == 0 then
+        local player = getPlayer()
+        if player then
+            TLOU_Spores.UpdateInSpores(player)
         end
     end
 
@@ -139,7 +129,7 @@ TLOU_Spores.OnTick = function(ticks)
 
         -- check if building was generated for spores
         local buildingDef = building:getDef()
-        local x_bID,y_bID,z_bID = TLOU_Spores.getBuildingID(buildingDef)
+        local x_bID,y_bID,z_bID = DoggyAPI_WORLD.getBuildingID(buildingDef)
         local buildingID = x_bID.."x"..y_bID.."x"..z_bID
         if MODDATA_SPORES_BUILDINGS[buildingID] then break end
 

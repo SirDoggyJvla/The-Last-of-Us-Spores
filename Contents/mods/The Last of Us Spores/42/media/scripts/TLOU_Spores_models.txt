@@ -1,0 +1,95 @@
+module TLOU
+{
+	model SporesScanner_PremiumMilitary
+	{
+		mesh = SporesScanner_PremiumMilitary,
+		texture = SporesScanner_PremiumMilitary,
+
+		attachment world
+		{
+			offset = 0.0001 0.0499 0.0170,
+			rotate = 90.2341 0.0022 179.7979,
+		}
+
+		attachment Bip01_Prop1
+		{
+			offset = 0.0224 -0.0142 0.0108,
+			rotate = 85.6470 -76.1943 92.3243,
+		}
+
+		attachment Bip01_Prop2
+		{
+			offset = -0.0076 -0.0157 0.0112,
+			rotate = 162.5014 71.5664 -175.1895,
+		}
+	}
+	model SporesScanner_PremiumCivilian
+	{
+		mesh = SporesScanner_PremiumCivilian,
+		texture = SporesScanner_PremiumCivilian,
+
+		attachment world
+		{
+			offset = 0.0001 0.0499 0.0170,
+			rotate = 90.2341 0.0022 179.7979,
+		}
+
+		attachment Bip01_Prop1
+		{
+			offset = 0.0284 -0.0161 0.0001,
+			rotate = 85.6470 -76.1943 92.3243,
+		}
+
+		attachment Bip01_Prop2
+		{
+			offset = -0.0076 -0.0157 0.0112,
+			rotate = 162.5014 71.5664 -175.1895,
+		}
+	}
+	model SporesScanner_ValutechMilitary
+	{
+		mesh = SporesScanner_ValutechMilitary,
+		texture = SporesScanner_ValutechMilitary,
+
+		attachment world
+		{
+			offset = -0.0010 -0.0000 0.0526,
+			rotate = 90.0000 0.9152 -179.9815,
+		}
+
+		attachment Bip01_Prop1
+		{
+			offset = 0.0507 0.0552 0.0104,
+			rotate = 85.6470 -76.1943 92.3243,
+		}
+
+		attachment Bip01_Prop2
+		{
+			offset = -0.0307 0.0473 0.0235,
+			rotate = 162.5014 71.5664 -175.1895,
+		}
+	}
+	model SporesScanner_PharmahugScientific
+	{
+		mesh = SporesScanner_PharmahugScientific,
+		texture = SporesScanner_PharmahugScientific,
+
+		attachment world
+		{
+			offset = 0.0001 0.0499 0.0170,
+			rotate = 90.2341 0.0022 179.7979,
+		}
+
+		attachment Bip01_Prop1
+		{
+			offset = 0.0224 -0.0142 0.0108,
+			rotate = 85.6470 -76.1943 92.3243,
+		}
+
+		attachment Bip01_Prop2
+		{
+			offset = -0.0076 -0.0157 0.0112,
+			rotate = 162.5014 71.5664 -175.1895,
+		}
+	}
+}

@@ -15,14 +15,20 @@ Events of TLOU Spores.
 local TLOU_Spores = require "TLOU_Spores_module"
 require "TLOU_Spores"
 
+-- custom events
+local DoggyAPI = require "DoggyAPI_module"
+local EVENTS = DoggyAPI.EVENTS
+
+require "DoggyAPI_LoadNewChunk"
+
 -- game starting
 Events.OnInitGlobalModData.Add(TLOU_Spores.OnInitGlobalModData)
 
 -- new save
 Events.OnNewGame.Add(TLOU_Spores.OnNewGame)
 
--- gridsquares getting loaded in
-Events.LoadChunk.Add(TLOU_Spores.LoadChunk)
+-- new chunk getting loaded in
+EVENTS.LoadNewChunk:addListener(TLOU_Spores.LoadNewChunk)
 
 -- every ticks
 Events.OnTick.Add(TLOU_Spores.OnTick)

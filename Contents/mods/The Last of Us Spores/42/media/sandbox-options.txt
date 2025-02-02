@@ -13,9 +13,6 @@ option TLOU_Spores.NoiseMapScale
 	translation = TLOU_Spores_NoiseMapScale,
 }
 
-/*---------------------------------------------------------------------
--- CUSTOM SEEDS
----------------------------------------------------------------------*/
 option TLOU_Spores.CustomSeeds
 {
 	type = boolean,
@@ -44,12 +41,38 @@ option TLOU_Spores.y_seed
 	translation = TLOU_Spores_y_seed,
 }
 
-option TLOU_Spores.other_seed
+option TLOU_Spores.offset_seed
 {
 	type = integer, 
 	min = 50000, 
 	max = 500000, 
 	default = 123456,
 	page = TLOU_Spores,
-	translation = TLOU_Spores_other_seed,
+	translation = TLOU_Spores_offset_seed,
+}
+
+
+
+/*---------------------------------------------------------------------
+-- SPORES STATS
+---------------------------------------------------------------------*/
+
+option TLOU_Spores.MaximumTimeInSpores
+{
+	type = integer, 
+	min = 0, 
+	max = 120, 
+	default = 10,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_MaximumTimeInSpores,
+}
+
+option TLOU_Spores.SporesInfectionStrength // in minutes
+{
+	type = integer, 
+	min = 0, 
+	max = 10080, 
+	default = 120,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesInfectionStrength,
 }

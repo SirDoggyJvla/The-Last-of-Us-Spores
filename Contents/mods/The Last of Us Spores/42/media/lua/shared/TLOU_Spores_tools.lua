@@ -14,6 +14,9 @@ Tools file of TLOU Spores.
 --- CACHING
 -- module
 local TLOU_Spores = require "TLOU_Spores_module"
+local DoggyAPI = require "DoggyAPI_module"
+local DoggyAPI_NOISEMAP = DoggyAPI.NOISEMAP
+local DoggyAPI_FINDERS = DoggyAPI.FINDERS
 
 -- random
 local GENERAL_RANDOM = newrandom()
@@ -21,9 +24,8 @@ local GENERAL_RANDOM = newrandom()
 -- debug mode
 local isDebug = isDebugEnabled()
 
--- mod data
-local MODDATA_SPORES_ROOMS
-
+-- noise map
+local SEEDS = TLOU_Spores.SEEDS
 
 
 --[[ ================================================ ]]--
@@ -131,13 +133,13 @@ end
 ---@param bID any
 TLOU_Spores.RollForSpores = function(buildingDef,bID)
     -- get building spore map concentration
-    local wx,wy = bID.x_bID,bID.y_bID
-    TLOU_Spores.NOISE_MAP_SCALE = 25
-    local noiseValue = TLOU_Spores.getNoiseValue(wx, wy)
-    TLOU_Spores.NOISE_SPORE_THRESHOLD = 0.5
-    TLOU_Spores.MINIMUM_PERCENTAGE_OF_ROOMS_WITH_SPORES = 0.2
+    local noiseValue = DoggyAPI_NOISEMAP.getNoiseValue(
+        bID.x_bID, bID.y_bID,
+        TLOU_Spores.NOISE_MAP_SCALE,
+        TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,
+        SEEDS.x_seed,SEEDS.y_seed,SEEDS.offset_seed
+    )
     local spore_concentration = noiseValue - TLOU_Spores.NOISE_SPORE_THRESHOLD
-    spore_concentration = 1
 
     -- threshold can be decided by user in sandbox options
     if spore_concentration <= 0 then return end
@@ -166,7 +168,7 @@ TLOU_Spores.RollForSpores = function(buildingDef,bID)
     local sourceRoomID = roomIDs[sourceRoomIndex]
 
     -- mod data
-    MODDATA_SPORES_ROOMS = MODDATA_SPORES_ROOMS or ModData.getOrCreate("TLOU_Spores_rooms")
+    local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
 
     -- get source room coordinates
     local source_coordinates = mappedRooms[sourceRoomIndex]
@@ -290,5 +292,139 @@ TLOU_Spores.GetWallDirection = function(square)
     end
 
     return direction
+end
+
+
+
+
+
+
+--[[ ================================================ ]]--
+--- HANDLE CHARACTER IN SPORE ZONE ---
+--[[ ================================================ ]]--
+
+TLOU_Spores.CheckInSpores = function(character)
+    -- access the player room
+    local roomDef = character:getCurrentRoomDef()
+
+    -- check if in spores
+    local inSpores = false
+    if roomDef then
+        -- get room ID
+        local roomID = TLOU_Spores.GetRoomID(roomDef)
+        local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
+
+        -- check if room has spores
+        inSpores = MODDATA_SPORES_ROOMS[roomID]
+    end
+
+    return inSpores
+end
+
+TLOU_Spores.UpdateInSpores = function(character)
+    local character_modData = character:getModData().TLOU_Spores
+    if not character_modData then
+        character:getModData().TLOU_Spores = {}
+        character_modData = character:getModData().TLOU_Spores
+    end
+
+    -- check if in spores
+    local inSporesPreviously = character_modData["inSpores"]
+    local inSporesNow = TLOU_Spores.CheckInSpores(character)
+
+    if inSporesNow then
+        if inSporesPreviously then
+            return TLOU_Spores.CharacterIsInSpores(character,character_modData)
+        else
+            return TLOU_Spores.CharacterEntersSpores(character,character_modData)
+        end
+    elseif inSporesPreviously then
+        return TLOU_Spores.CharacterExitSpores(character,character_modData)
+    end
+
+    -- nil because spores are not a thing for the player rn
+    return nil, nil
+end
+
+TLOU_Spores.CharacterIsInSpores = function(character,character_modData)
+    character_modData = character_modData or character:getModData().TLOU_Spores
+
+    local bodyDamage = character:getBodyDamage()
+
+    -- verify if player's protection is enough
+    -- print(character:isProtectedFromToxic())
+    if character:getCorpseSicknessDefense() >= 100 or character:isProtectedFromToxic() then
+        -- reset timer if present
+        if character_modData["sporeTimer"] then
+            character_modData["sporeTimer"] = nil
+        end
+        return true, nil
+    end
+
+    -- get the time delta
+    local timer = character_modData["sporeTimer"]
+    if not timer then
+        timer = getGametimeTimestamp()/60
+        character_modData["sporeTimer"] = timer
+    end
+    local timeDelta = getGametimeTimestamp()/60 - timer
+
+    -- infected if too long in spores
+    if not bodyDamage:IsInfected() and not character_modData["infectedBySpores"] then
+        if timeDelta >= SandboxVars.TLOU_Spores.MaximumTimeInSpores then
+            character:addLineChatElement("Infected by spores")
+            bodyDamage:setInfected(true)
+            bodyDamage:setInfectionMortalityDuration(SandboxVars.TLOU_Spores.SporesInfectionStrength/60)
+            character_modData["infectedBySpores"] = true
+        end
+    end
+
+    -- update health status
+    if not bodyDamage:isHasACold() then
+        bodyDamage:setHasACold(true)
+        bodyDamage:setColdStrength(80)
+        bodyDamage:setTimeToSneezeOrCough(0)
+    end
+
+    -- DEBUGING
+    if not character_modData["previousTime"] then
+        character_modData["previousTime"] = timeDelta
+    else
+        if character_modData["previousTime"] ~= timeDelta then
+            character_modData["previousTime"] = timeDelta
+            print("In spores: "..tostring(timeDelta))
+        end
+    end
+
+    return true, timeDelta
+end
+
+TLOU_Spores.CharacterEntersSpores = function(character,character_modData)
+    print("Enter spores")
+    character_modData = character_modData or character:getModData().TLOU_Spores
+
+    -- initialize in spores
+    character_modData["inSpores"] = true
+    character_modData["sporeTimer"] = getGametimeTimestamp()/60
+
+    local bodyDamage = character:getBodyDamage()
+
+    character_modData["originaHealthStatus"] = {
+        hasACold = bodyDamage:isHasACold(),
+    }
+
+    return TLOU_Spores.CharacterIsInSpores(character,character_modData)
+end
+
+TLOU_Spores.CharacterExitSpores = function(character,character_modData)
+    print("Exit spores")
+    character_modData = character_modData or character:getModData().TLOU_Spores
+
+    -- reinitialize in spores
+    character_modData["sporeTimer"] = nil
+    character_modData["inSpores"] = nil
+
+    -- false for the character exiting spores
+    return false, nil
 end
 

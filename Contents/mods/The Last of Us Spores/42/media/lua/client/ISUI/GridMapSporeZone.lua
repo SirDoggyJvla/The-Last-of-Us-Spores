@@ -11,15 +11,17 @@ GridMapSporeZone file of TLOU Spores. Used to show a map of spore zones.
 ]]--
 --[[ ================================================ ]]--
 
+--- REQUIREMENTS
+local TLOU_Spores = require "TLOU_Spores_module"
+local DoggyAPI = require "DoggyAPI_module"
+local DoggyAPI_NOISEMAP = DoggyAPI.NOISEMAP
+
+-- vanilla
+require "ISUI/ISPanel"
 
 --- CACHING
--- module
-local TLOU_Spores = require "TLOU_Spores_module"
-
-
-
---- REQUIREMENTS
-require "ISUI/ISPanel"
+-- noise map
+local SEEDS = TLOU_Spores.SEEDS
 
 TLOU_Spores.GridMapSporeZone = ISUIElement:derive("GridMapSporeZone")
 local GridMapSporeZone = TLOU_Spores.GridMapSporeZone
@@ -127,7 +129,13 @@ end
 
 function GridMapSporeZone:populateSporeZones(wx, wy, NOISE_MAP_SCALE, MINIMUM_NOISE_VECTOR_VALUE, MAXIMUM_NOISE_VECTOR_VALUE)
 	local sporeZones = self.sporeZones
-    local noiseValue = TLOU_Spores.getNoiseValue(wx, wy, NOISE_MAP_SCALE, MINIMUM_NOISE_VECTOR_VALUE, MAXIMUM_NOISE_VECTOR_VALUE)
+    -- get building spore map concentration
+    local noiseValue = DoggyAPI_NOISEMAP.getNoiseValue(
+        wx, wy,
+        NOISE_MAP_SCALE,
+        MINIMUM_NOISE_VECTOR_VALUE,MAXIMUM_NOISE_VECTOR_VALUE,
+        SEEDS.x_seed,SEEDS.y_seed,SEEDS.offset_seed
+    )
     sporeZones[wx] = sporeZones[wx] or {}
     -- get concentration
     local spore_concentration = noiseValue - self.NOISE_SPORE_THRESHOLD

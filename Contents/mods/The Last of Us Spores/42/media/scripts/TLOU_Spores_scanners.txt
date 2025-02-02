@@ -1,0 +1,109 @@
+module TLOU
+{
+    item SporesScanner_PremiumMilitary
+    {
+        DisplayName = Premium Military Spore Scanner,
+        Tooltip = Tooltip_item_SporesScanner_PremiumMilitary,
+        DisplayCategory = Electronics,
+        Type = Drainable,
+        Weight = 0.3,
+        Icon = SporesScanner_PremiumMilitary,
+        ActivatedItem = TRUE,
+        DisappearOnUse = FALSE,
+        KeepOnDeplete = TRUE,
+        UseWhileEquipped = TRUE,
+        MetalValue = 10,
+        TorchCone = TRUE,
+        UseDelta = 0.0003,
+        cantBeConsolided = TRUE,
+
+        StaticModel = SporesScanner_PremiumMilitary,
+        primaryAnimMask = HoldingUmbrellaRight,
+        secondaryAnimMask = HoldingUmbrellaLeft,
+        WorldStaticModel = SporesScanner_PremiumMilitary,
+        AttachmentType = Walkie,
+
+        SoundMap = Activate FlashlightOn,
+        SoundMap = Deactivate FlashlightOff,
+    }
+
+    item SporesScanner_PremiumCivilian
+    {
+        DisplayName = Premium Civilian Spore Scanner,
+        Tooltip = Tooltip_item_SporesScanner_PremiumCivilian,
+        DisplayCategory = Electronics,
+        Type = Drainable,
+        Weight = 0.3,
+        Icon = SporesScanner_PremiumCivilian,
+        ActivatedItem = TRUE,
+        DisappearOnUse = FALSE,
+        KeepOnDeplete = TRUE,
+        UseWhileEquipped = TRUE,
+        MetalValue = 10,
+        TorchCone = TRUE,
+        UseDelta = 0.0003,
+        cantBeConsolided = TRUE,
+
+        StaticModel = SporesScanner_PremiumCivilian,
+        primaryAnimMask = HoldingUmbrellaRight,
+        secondaryAnimMask = HoldingUmbrellaLeft,
+        WorldStaticModel = SporesScanner_PremiumCivilian,
+        AttachmentType = Walkie,
+
+        SoundMap = Activate FlashlightOn,
+        SoundMap = Deactivate FlashlightOff,
+    }
+
+    item SporesScanner_ValutechMilitary
+    {
+        DisplayName = Valutech Military Spore Scanner,
+        Tooltip = Tooltip_item_SporesScanner_ValutechMilitary,
+        DisplayCategory = Electronics,
+        Type = Drainable,
+        Weight = 0.3,
+        Icon = SporesScanner_ValutechMilitary,
+        ActivatedItem = TRUE,
+        DisappearOnUse = FALSE,
+        KeepOnDeplete = TRUE,
+        UseWhileEquipped = TRUE,
+        MetalValue = 10,
+        TorchCone = TRUE,
+        UseDelta = 0.0003,
+        cantBeConsolided = TRUE,
+
+        StaticModel = SporesScanner_ValutechMilitary,
+        primaryAnimMask = HoldingUmbrellaRight,
+        secondaryAnimMask = HoldingUmbrellaLeft,
+        WorldStaticModel = SporesScanner_ValutechMilitary,
+
+        SoundMap = Activate FlashlightOn,
+        SoundMap = Deactivate FlashlightOff,
+    }
+
+    item SporesScanner_PharmahugScientific
+    {
+        DisplayName = Pharmahug Scientific Spore Scanner,
+        Tooltip = Tooltip_item_SporesScanner_PharmahugScientific,
+        DisplayCategory = Electronics,
+        Type = Drainable,
+        Weight = 0.3,
+        Icon = SporesScanner_PharmahugScientific,
+        ActivatedItem = TRUE,
+        DisappearOnUse = FALSE,
+        KeepOnDeplete = TRUE,
+        UseWhileEquipped = TRUE,
+        MetalValue = 10,
+        TorchCone = TRUE,
+        UseDelta = 0.0003,
+        cantBeConsolided = TRUE,
+
+        StaticModel = SporesScanner_PharmahugScientific,
+        primaryAnimMask = HoldingUmbrellaRight,
+        secondaryAnimMask = HoldingUmbrellaLeft,
+        WorldStaticModel = SporesScanner_PharmahugScientific,
+        AttachmentType = Walkie,
+
+        SoundMap = Activate FlashlightOn,
+        SoundMap = Deactivate FlashlightOff,
+    }
+}

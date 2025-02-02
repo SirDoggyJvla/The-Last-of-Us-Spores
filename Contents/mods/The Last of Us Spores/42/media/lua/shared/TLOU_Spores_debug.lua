@@ -67,10 +67,12 @@ TLOU_Spores.DEBUG.OnFillWorldObjectContextMenu = function(playerIndex, context, 
 
     --- HIDE NOISE MAP ---
     subMenu:addOption("Hide noise map",nil,function() TLOU_Spores.iSSporeZoneChunkMap:setVisible(false) TLOU_Spores.iSSporeZoneChunkMap:removeFromUIManager() end)
+
+    subMenu:addOption("Reset spores infection",nil,TLOU_Spores.DEBUG.ResetSporesInfection)
 end
 
 TLOU_Spores.DEBUG.ResetSporeZones = function()
-    ModData.remove("TLOU_Spores_chunks")
+    ModData.remove("DoggyAPI_NewChunk")
     ModData.remove("TLOU_Spores_buildings")
     ModData.remove("TLOU_Spores_rooms")
 
@@ -90,7 +92,13 @@ TLOU_Spores.DEBUG.ShowNoiseMap = function()
     TLOU_Spores.iSSporeZoneChunkMap:addToUIManager();
 end
 
-
+TLOU_Spores.DEBUG.ResetSporesInfection = function()
+    local character = getPlayer()
+    local character_modData = character:getModData().TLOU_Spores
+    character_modData["infectedBySpores"] = nil
+    character_modData["inSpores"] = nil
+    character_modData["sporeTimer"] = nil
+end
 
 TLOU_Spores.SwapBoolean = function(boolean)
     if boolean then
@@ -151,10 +159,9 @@ TLOU_Spores.DEBUG.OnKeyPressed = function(key)
 end
 
 TLOU_Spores.DEBUG.OnObjectLeftMouseButtonDown = function(object,x,y)
+    if true then return end
     local building = getPlayer():getBuilding()
     if not building then return end
-
-    print("pass")
 
     local buildingDef = building:getDef()
     local x_bID,y_bID,z_bID = TLOU_Spores.getBuildingID(buildingDef)
