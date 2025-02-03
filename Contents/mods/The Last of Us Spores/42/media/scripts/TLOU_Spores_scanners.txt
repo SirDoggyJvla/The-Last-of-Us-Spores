@@ -106,4 +106,22 @@ module TLOU
         SoundMap = Activate FlashlightOn,
         SoundMap = Deactivate FlashlightOff,
     }
+
+    sound SporesScanner_SporeZone1
+    {
+        category = SporesScanner, loop = false, is3D = true,
+        clip { file = media/sound/SporesScanner/SporesScanner_SporeZone1.ogg, distanceMax = 2, volume = 0.80, }
+    }
+
+    sound SporesScanner_SporeZone2
+    {
+        category = SporesScanner, loop = false, is3D = true,
+        clip { file = media/sound/SporesScanner/SporesScanner_SporeZone2.ogg, distanceMax = 2, volume = 0.80, }
+    }
+
+    sound SporesScanner_modeSwitch
+    {
+        category = SporesScanner, loop = false, is3D = true,
+        clip { file = media/sound/SporesScanner/SporesScanner_modeSwitch.ogg, distanceMax = 2, volume = 0.80, }
+    }
 }

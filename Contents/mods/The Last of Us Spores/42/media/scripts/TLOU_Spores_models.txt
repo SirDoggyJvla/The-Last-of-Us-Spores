@@ -23,6 +23,7 @@ module TLOU
 			rotate = 162.5014 71.5664 -175.1895,
 		}
 	}
+
 	model SporesScanner_PremiumCivilian
 	{
 		mesh = SporesScanner_PremiumCivilian,
@@ -46,6 +47,7 @@ module TLOU
 			rotate = 162.5014 71.5664 -175.1895,
 		}
 	}
+
 	model SporesScanner_ValutechMilitary
 	{
 		mesh = SporesScanner_ValutechMilitary,
@@ -69,6 +71,7 @@ module TLOU
 			rotate = 162.5014 71.5664 -175.1895,
 		}
 	}
+
 	model SporesScanner_PharmahugScientific
 	{
 		mesh = SporesScanner_PharmahugScientific,

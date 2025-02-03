@@ -86,10 +86,6 @@ TLOU_Spores.DEBUG.ShowNoiseMap = function()
     TLOU_Spores.iSSporeZoneChunkMap = TLOU_Spores.ISSporeZoneChunkMap:new(x, y)
     TLOU_Spores.iSSporeZoneChunkMap:initialise()
     TLOU_Spores.iSSporeZoneChunkMap:addToUIManager()
-
-    --- show UI
-    TLOU_Spores.iSSporeZoneChunkMap:setVisible(true);
-    TLOU_Spores.iSSporeZoneChunkMap:addToUIManager();
 end
 
 TLOU_Spores.DEBUG.ResetSporesInfection = function()

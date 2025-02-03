@@ -104,6 +104,12 @@ local TLOU_Spores = {
         },
     },
 
+    --- SCANNERS ---
+    SCANNERS_VALID_FOR_SPORE_DETECTION = {
+        ["TLOU.SporesScanner_PremiumCivilian"] = 7,
+        ["TLOU.SporesScanner_ValutechMilitary"] = 20,
+    },
+
     --- NOISE MAP ---
     SEEDS = {},
     NOISE_MAP_SCALE = 25,

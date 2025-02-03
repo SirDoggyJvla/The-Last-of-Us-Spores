@@ -122,6 +122,21 @@ TLOU_Spores.GetNextClosestRoom = function(
     return closestRoomID,closestRoomIndex
 end
 
+TLOU_Spores.IsSquareSporeZone = function(square)
+    local room = square:getRoom()
+    if not room then return false end
+
+    local roomDef = room:getRoomDef()
+    if not roomDef then return false end
+
+    -- get room ID
+    local roomID = TLOU_Spores.GetRoomID(roomDef)
+    local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
+
+    -- check if room has spores
+    return MODDATA_SPORES_ROOMS[roomID]
+end
+
 
 
 --[[ ================================================ ]]--
@@ -428,3 +443,131 @@ TLOU_Spores.CharacterExitSpores = function(character,character_modData)
     return false, nil
 end
 
+
+
+
+
+
+
+--[[ ================================================ ]]--
+--- SPORE SCANNER ---
+--[[ ================================================ ]]--
+
+TLOU_Spores.ScanForSpores = function(ticks)
+    local client_player = getPlayer()
+
+    -- cache emitters
+    local emitter = client_player:getEmitter()
+    local sporeZoneDetectorEmitter1 = emitter:isPlaying('SporesScanner_SporeZone1')
+    local sporeZoneDetectorEmitter2 = emitter:isPlaying('SporesScanner_SporeZone2')
+
+    -- we don't need to do any check if any of these emitters are playing
+    if sporeZoneDetectorEmitter1 or sporeZoneDetectorEmitter2 then return end
+
+    -- only update every n seconds minimum sound time
+    local lastCheck = TLOU_Spores.lastCheck
+    local current_time = os.time()
+    if not lastCheck then TLOU_Spores.lastCheck = current_time return end
+    if current_time - lastCheck < 0.38 then return end
+    TLOU_Spores.lastCheck = current_time
+
+    -- retrieve the first scanner
+    local inventory = client_player:getInventory()
+    local scanners = ArrayList.new()
+    inventory:getAllEvalRecurse(TLOU_Spores.isScanner,scanners)
+    local scannersAmount = scanners:size()
+
+    -- skip if no scanner found
+    if scannersAmount <= 0 then return end
+
+    -- retrieve the best scanner
+    local scanner
+    local maxRadius = 0
+    for i = 0, scannersAmount - 1 do repeat
+        -- verify that scanner is activated and charged
+        local temp_scanner = scanners:get(i)
+        if not temp_scanner:isActivated() or temp_scanner:getUseDelta() == 0 then break end
+
+        -- check if scanner is valid to detect (attached or in hands)
+        local primaryItem = client_player:getPrimaryHandItem()
+        local secondaryItem = client_player:getSecondaryHandItem()
+        if temp_scanner:getAttachedSlotType() or primaryItem and primaryItem == temp_scanner or secondaryItem and secondaryItem == temp_scanner then
+            -- detection radius
+            local radius = TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[temp_scanner:getFullType()]
+
+            -- update best scanner choice
+            scanner = maxRadius < radius and scanner or temp_scanner
+        end
+    until true end
+
+    -- skip if no scanner found
+    if not scanner then return end
+
+
+
+
+    --- IN BUILDING ---
+
+    if TLOU_Spores.CheckInSpores(client_player) then
+        emitter:playSound('SporesScanner_SporeZone2')
+        addSound(nil, client_player:getX(), client_player:getY(), client_player:getZ(), 7, 7)
+        return
+    end
+
+    --- CLOSE TO A SPORE ZONE ---
+
+    -- detection radius
+    local radius = TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[scanner:getFullType()]
+
+    -- get player coordinates
+    local p_x = client_player:getX()
+    local p_y = client_player:getY()
+    local p_z = client_player:getZ()
+
+    -- makes sure the code doesn't do weird shit when at the world height limit
+    -- to check a floor above and below
+    local min_h = p_z - 1
+    min_h = min_h < 0 and 0 or min_h > 7 and 7 or min_h
+    local max_h = p_z + 1
+    max_h = max_h < 0 and 0 or max_h > 7 and 7 or max_h
+
+    -- retrieve nearest spore zone square
+    local _,dist = DoggyAPI_FINDERS.FindNearestValidSquare(p_x,p_y,radius,min_h,max_h,DoggyAPI_FINDERS.CIRCULAR_OUTWARD_DIRECTIONS,TLOU_Spores.IsSquareSporeZone)
+
+    -- check if something is detected
+    if dist then
+        -- check if should bip
+        local lastBip = TLOU_Spores.lastBip
+        local shouldBip = true
+        if lastBip then
+            local bipTime = lastBip.time
+            local diffTime = current_time - bipTime
+            dist = dist - dist%1
+            local timeToBip = math.log(dist)^2/2
+            if diffTime < timeToBip then
+                shouldBip = false
+            end
+        end
+
+        if shouldBip then
+            emitter:playSound('SporesScanner_SporeZone1')
+            addSound(nil, client_player:getX(), client_player:getY(), client_player:getZ(), 7, 7)
+            TLOU_Spores.lastBip = {time = current_time, dist = dist}
+        end
+    elseif TLOU_Spores.lastBip then
+        TLOU_Spores.lastBip = nil
+    end
+
+
+
+    -- skip other scanners, no point in running all of them
+    return
+end
+
+
+---Test function to recursively find scanners in the inventory.
+---@param item InventoryItem
+---@return any
+TLOU_Spores.isScanner = function(item)
+	return TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[item:getFullType()] ~= nil
+end

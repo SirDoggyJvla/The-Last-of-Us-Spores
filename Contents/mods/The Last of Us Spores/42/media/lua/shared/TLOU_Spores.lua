@@ -21,19 +21,14 @@ local DoggyAPI_WORLD = DoggyAPI.WORLD
 -- coordinates to check
 local CHECK_COORDINATES = {}
 
--- debug mode
-local isDebug = isDebugEnabled()
-
 -- game loaded caching
 local MODDATA_SPORES_BUILDINGS
 local MODDATA_SPORES_SEEDS
-local MODDATA_SPORES_ROOMS
 
 ---Used to cache some stuff on startup
 TLOU_Spores.OnInitGlobalModData = function()
     -- reset mod data to current save
     MODDATA_SPORES_BUILDINGS = ModData.getOrCreate("TLOU_Spores_buildings")
-    MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
 
     --- PERSISTENT DATA
     MODDATA_SPORES_SEEDS = MODDATA_SPORES_SEEDS or ModData.getOrCreate("TLOU_Spores_seeds")
@@ -105,6 +100,9 @@ TLOU_Spores.OnTick = function(ticks)
             TLOU_Spores.UpdateInSpores(player)
         end
     end
+
+    -- update the scanners
+    TLOU_Spores.ScanForSpores(ticks)
 
     -- no coordinates to check
     if #CHECK_COORDINATES == 0 then return end
