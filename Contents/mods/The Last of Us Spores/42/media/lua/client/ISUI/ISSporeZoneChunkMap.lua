@@ -103,16 +103,14 @@ end
 
 function ISSporeZoneChunkMap:prerender() -- Call before render, it's for harder stuff that need init, ect
     ISPanel.prerender(self)
-    self:drawText("Noise map inspector",100,0,1,1,1,1, UIFont.Large) -- You can put it in render() too
-
-
+    self:drawTextureScaled(self.texture, 0 , 0, self.new_w, self.new_h, 1, 1, 1, 1)
+    if not self.limitedUserMode then
+        self:drawText("Noise map inspector",100,0,1,1,1,1, UIFont.Large) -- You can put it in render() too
+    end
 end
 
 function ISSporeZoneChunkMap:render() -- Use to render text and other
 end
-
-
-
 
 
 
@@ -127,9 +125,29 @@ end
 
 function ISSporeZoneChunkMap:create() -- Use to make the elements
     local x,y = 80,550
+    local limitedUserMode = self.limitedUserMode
+
+    --- TEXTURES ---
+
+    local uiSize,quit_x,quit_y,quit_w,quit_h
+    local grid_corner_UI = self.grid_corner_UI
+    if limitedUserMode then
+        uiSize = grid_corner_UI.grid_size
+        local quit_button = self.quit_button
+        quit_x = quit_button.x
+        quit_y = quit_button.y
+        quit_w = quit_button.w
+        quit_h = quit_button.h
+    else
+        uiSize = 500
+        quit_x = 0
+        quit_y = 0
+        quit_w = BUTTON_WDT
+        quit_h = BUTTON_HGT
+    end
 
     --- CREATE GRID MAP VIEW ---
-    self.mapPanel = TLOU_Spores.GridMapSporeZone:new(25, 40, 500, 500)
+    self.mapPanel = TLOU_Spores.GridMapSporeZone:new(grid_corner_UI.x, grid_corner_UI.y, uiSize, self.maxMapRange, limitedUserMode)
 	self.mapPanel:initialise();
 	self.mapPanel:instantiate();
 	self.mapPanel:setAnchorLeft(false);
@@ -137,47 +155,96 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
 	self:addChild(self.mapPanel)
 
     --- CLOSE BUTTON ---
-    local _, closeButton = ISDebugUtils.addButton(self,"close",0,0, BUTTON_WDT,BUTTON_HGT, "Close", ISSporeZoneChunkMap.onClickClose)
+    local _, closeButton = ISDebugUtils.addButton(self,"close",quit_x,quit_y, quit_w,quit_h, "Close", ISSporeZoneChunkMap.onClickClose)
     self.closeButton = closeButton
 
-    --- NOISE THRESHOLD SLIDER ---
-    self:addSlider("noiseThreshold","Noise threshold",x,y,0,1,0.1,0.1,TLOU_Spores.NOISE_SPORE_THRESHOLD,ISSporeZoneChunkMap.onNoiseThresholdSliderChange)
+    if limitedUserMode then
+        closeButton.backgroundColor.a = 0
+        closeButton.borderColor = {r=1, g=0, b=0, a=1}
+        closeButton.title = nil
+    end
 
-    --- NOISE SCALE SLIDER ---
-    self:addSlider("noiseScale","Noise scale",x,y + BUTTON_HGT + UI_BORDER_SPACING,0,100,1,1,TLOU_Spores.NOISE_MAP_SCALE,ISSporeZoneChunkMap.onNoiseScaleSliderChange)
+    if not limitedUserMode then
+        --- NOISE THRESHOLD SLIDER ---
+        self:addSlider("noiseThreshold","Noise threshold",x,y,0,1,0.1,0.1,TLOU_Spores.NOISE_SPORE_THRESHOLD,ISSporeZoneChunkMap.onNoiseThresholdSliderChange)
 
-    --- MINIMUM NOISE VECTOR VALUE SLIDER ---
-    self:addSlider("minimumNoiseVectorValue","Minimum noise vector value",x,y + BUTTON_HGT*2 + UI_BORDER_SPACING*2,-5,5,1,1,TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,ISSporeZoneChunkMap.onMinimumNoiseVectorValueSliderChange)
+        --- NOISE SCALE SLIDER ---
+        self:addSlider("noiseScale","Noise scale",x,y + BUTTON_HGT + UI_BORDER_SPACING,0,100,1,1,TLOU_Spores.NOISE_MAP_SCALE,ISSporeZoneChunkMap.onNoiseScaleSliderChange)
 
-    --- MAXIMUM NOISE VECTOR VALUE SLIDER ---
-    self:addSlider("maximumNoiseVectorValue","Maximum noise vector value",x,y + BUTTON_HGT*3 + UI_BORDER_SPACING*3,-5,5,1,1,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,ISSporeZoneChunkMap.onMaximumNoiseVectorValueSliderChange)
+        --- MINIMUM NOISE VECTOR VALUE SLIDER ---
+        self:addSlider("minimumNoiseVectorValue","Minimum noise vector value",x,y + BUTTON_HGT*2 + UI_BORDER_SPACING*2,-5,5,1,1,TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,ISSporeZoneChunkMap.onMinimumNoiseVectorValueSliderChange)
 
-    --- GRID BOOLEAN ---
-    self.mapPanel.gridBoolean = ISTickBox:new(400,5, 200, BUTTON_HGT,"Grid: ",self)
-    self.mapPanel.gridBoolean:initialise()
-	self:addChild(self.mapPanel.gridBoolean)
-    self.mapPanel.gridBoolean:addOption(getText("Grid: "));
-    self.mapPanel.gridBoolean.selected[1] = true
+        --- MAXIMUM NOISE VECTOR VALUE SLIDER ---
+        self:addSlider("maximumNoiseVectorValue","Maximum noise vector value",x,y + BUTTON_HGT*3 + UI_BORDER_SPACING*3,-5,5,1,1,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,ISSporeZoneChunkMap.onMaximumNoiseVectorValueSliderChange)
+
+
+        --- GRID BOOLEAN ---
+        self.mapPanel.gridBoolean = ISTickBox:new(400,5, 200, BUTTON_HGT,"Grid: ",self)
+        self.mapPanel.gridBoolean:initialise()
+        self:addChild(self.mapPanel.gridBoolean)
+        self.mapPanel.gridBoolean:addOption(getText("Grid: "));
+        self.mapPanel.gridBoolean.selected[1] = true
+    end
 end
 
-function ISSporeZoneChunkMap:new(x, y)
+function ISSporeZoneChunkMap:new(x, y, maxMapRange, limitedUserMode, scanner)
     local width = 550
-    local height = 700
+    local height = limitedUserMode and 550 or 700
 
     local o = {}
     o = ISPanel:new(x, y, width, height)
     setmetatable(o, self)
     self.__index = self
 
-    self.width = width
-    self.height = height
+
+    -- textures
+    if scanner then
+        local textureBackground = TLOU_Spores.SCANNERS_UI_TEXTURE[scanner:getFullType()]
+
+        -- get texture
+        local texture = textureBackground.texture
+        o.texture = texture
+        o.texture_w = texture:getWidth()
+        o.texture_h = texture:getHeight()
+
+        -- define new UI size limits
+        o.new_w = 300
+        local ratio = o.new_w / o.texture_w
+        o.ratio = ratio
+        o.new_h = math.floor(o.texture_h * ratio)
+
+        -- grid coordinates
+        local corner_1 = textureBackground.grid_corner_1
+        local corner_2 = textureBackground.grid_corner_2
+        local grid_corner_UI = {x = corner_1.x * ratio, y = corner_1.y * ratio}
+        grid_corner_UI.grid_size = ((corner_2.x - corner_1.x) + (corner_2.y - corner_1.y)) * ratio / 2
+        o.grid_corner_UI = grid_corner_UI
+
+        -- quit button coordinates
+        local quit_button_1 = textureBackground.quit_button_corner_1
+        local quit_button_2 = textureBackground.quit_button_corner_2
+        o.quit_button = {x = quit_button_1.x * ratio, y = quit_button_1.y * ratio, w = (quit_button_2.x - quit_button_1.x) * ratio, h = (quit_button_2.y - quit_button_1.y) * ratio}
+
+        -- window size
+        o.width = o.new_w
+        o.height = o.new_h
+    end
 
     -- parameters
     -- o.ChunkSizeInSquares = IsoChunkMap.ChunkSizeInSquares
     o.title = getText("Spore zone manager")
 	o.moveWithMouse = true
 	-- o:setResizable(true)
-    o.backgroundColor.a = 0.8
+
+    o.maxMapRange = maxMapRange
+    o.limitedUserMode = limitedUserMode
+
+    if limitedUserMode then
+        o.borderColor = {r=0.4, g=0.4, b=0.4, a=0}
+        o.backgroundColor = {r=0, g=0, b=0, a=0}
+    else
+        o.backgroundColor.a = 0
+    end
 
     return o
 end

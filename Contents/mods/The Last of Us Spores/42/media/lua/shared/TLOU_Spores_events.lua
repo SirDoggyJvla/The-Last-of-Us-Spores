@@ -24,6 +24,9 @@ require "DoggyAPI_LoadNewChunk"
 -- game starting
 Events.OnInitGlobalModData.Add(TLOU_Spores.OnInitGlobalModData)
 
+-- existing a save
+Events.OnSave.Add(TLOU_Spores.OnSave)
+
 -- new save
 Events.OnNewGame.Add(TLOU_Spores.OnNewGame)
 
@@ -33,8 +36,8 @@ EVENTS.LoadNewChunk:addListener(TLOU_Spores.LoadNewChunk)
 -- every ticks
 Events.OnTick.Add(TLOU_Spores.OnTick)
 
--- existing a save
-Events.OnSave.Add(TLOU_Spores.OnSave)
+-- clicking scanner
+Events.OnFillInventoryObjectContextMenu.Add(TLOU_Spores.OnFillInventoryObjectContextMenu)
 
 if isDebugEnabled() then
     -- debug

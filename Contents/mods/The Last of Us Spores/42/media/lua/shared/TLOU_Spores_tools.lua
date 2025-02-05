@@ -514,6 +514,8 @@ TLOU_Spores.ScanForSpores = function(ticks)
         return
     end
 
+
+
     --- CLOSE TO A SPORE ZONE ---
 
     -- detection radius
@@ -557,11 +559,6 @@ TLOU_Spores.ScanForSpores = function(ticks)
     elseif TLOU_Spores.lastBip then
         TLOU_Spores.lastBip = nil
     end
-
-
-
-    -- skip other scanners, no point in running all of them
-    return
 end
 
 
@@ -570,4 +567,15 @@ end
 ---@return any
 TLOU_Spores.isScanner = function(item)
 	return TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[item:getFullType()] ~= nil
+end
+
+
+
+TLOU_Spores.ShowSporeConcentrationMap = function(mapRange, scanner)
+    local x = getCore():getScreenWidth()*0.25 -- Get the screen resolution
+    local y = getCore():getScreenHeight()*0.10 -- Get the screen resolution
+
+    TLOU_Spores.iSSporeZoneChunkMap = TLOU_Spores.ISSporeZoneChunkMap:new(x, y, mapRange, true, scanner)
+    TLOU_Spores.iSSporeZoneChunkMap:initialise()
+    TLOU_Spores.iSSporeZoneChunkMap:addToUIManager()
 end

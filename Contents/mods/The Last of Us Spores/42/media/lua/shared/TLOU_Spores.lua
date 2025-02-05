@@ -47,6 +47,10 @@ TLOU_Spores.OnInitGlobalModData = function()
     TLOU_Spores.NOISE_MAP_SCALE = scale
 end
 
+TLOU_Spores.OnSave = function()
+    CHECK_COORDINATES = {}
+end
+
 ---Used to initialize the seeds for this map, either by user input or randomness.
 TLOU_Spores.OnNewGame = function()
     MODDATA_SPORES_SEEDS = MODDATA_SPORES_SEEDS or ModData.getOrCreate("TLOU_Spores_seeds")
@@ -141,6 +145,22 @@ TLOU_Spores.OnTick = function(ticks)
     table.remove(CHECK_COORDINATES, 1)
 end
 
-TLOU_Spores.OnSave = function()
-    CHECK_COORDINATES = {}
+TLOU_Spores.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
+    for i = 1,#items do
+		-- retrieve the item
+		local item = items[i]
+		if not instanceof(item, "InventoryItem") then
+            item = item.items[1];
+        end
+
+
+
+
+        --- ITEM CAN HAVE MAP ---
+
+        local mapRange = TLOU_Spores.SCANNERS_VALID_FOR_MAP[item:getFullType()]
+        if mapRange then
+            local option = context:addOption("Show spore concentration map", mapRange, TLOU_Spores.ShowSporeConcentrationMap, item)
+        end
+    end
 end
