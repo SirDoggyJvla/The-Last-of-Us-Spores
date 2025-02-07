@@ -16,6 +16,8 @@ if not isDebugEnabled() then return end
 
 -- requirements
 local TLOU_Spores = require "TLOU_Spores_module"
+local DoggyAPI = require "DoggyAPI_module"
+local DoggyAPI_WORLD = DoggyAPI.WORLD
 
 --- CACHING
 -- player
@@ -160,7 +162,7 @@ TLOU_Spores.DEBUG.OnObjectLeftMouseButtonDown = function(object,x,y)
     if not building then return end
 
     local buildingDef = building:getDef()
-    local x_bID,y_bID,z_bID = TLOU_Spores.getBuildingID(buildingDef)
+    local x_bID,y_bID,z_bID = DoggyAPI_WORLD.getBuildingID(buildingDef)
     local buildingID = x_bID.."x"..y_bID.."x"..z_bID
 
     TLOU_Spores.RollForSpores(buildingDef,{x_bID = x_bID,y_bID = y_bID,z_bID = z_bID,buildingID = buildingID})

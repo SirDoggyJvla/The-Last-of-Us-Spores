@@ -231,7 +231,8 @@ function GridMapSporeZone:onMouseDoubleClick(x, y)
 	self:redefineCenterPoint()
 end
 
-function GridMapSporeZone:onMouseWheel(del)
+function GridMapSporeZone:onMouseWheel(del,_keyCall)
+	if self.limitedUserMode and not _keyCall then return end
 	self.scale = math.max(self.scale + del,0)
 
 	-- apply max range limitations
@@ -270,6 +271,8 @@ function GridMapSporeZone:create() -- Use to make the elements
 
 	--- GET DEFAULT MAP COORDINATES ---
 	self:redefineCenterPoint()
+
+	self.onMouseWheel = GridMapSporeZone.onMouseWheel
 end
 
 function GridMapSporeZone:new(x, y, uiSize, maxMapRange, limitedUserMode)

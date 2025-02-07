@@ -1,0 +1,8 @@
+Tooltip_EN = {
+    Tooltip_SporesScanner_needEquiping = "Scanner needs to be equiped.",
+    Tooltip_SporesScanner_needActivating = "Scanner needs to be turned on.",
+    Tooltip_SporesScanner_needCharging = "Scanner needs a charged battery.",
+
+    Tooltip_SporesScanner_concentrationPrecision = "Scanner has a spore concentration scanning precision of +/- %d %.",
+    Tooltip_SporesScanner_mapRange = "Scanner has a spore concentration map range of %d.",
+}

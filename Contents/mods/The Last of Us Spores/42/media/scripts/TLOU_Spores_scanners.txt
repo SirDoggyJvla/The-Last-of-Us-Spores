@@ -124,4 +124,10 @@ module TLOU
         category = SporesScanner, loop = false, is3D = true,
         clip { file = media/sound/SporesScanner/SporesScanner_modeSwitch.ogg, distanceMax = 2, volume = 0.80, }
     }
+
+    sound SporesScanner_run
+    {
+        category = SporesScanner, loop = false, is3D = true,
+        clip { file = media/sound/SporesScanner/SporesScanner_run.ogg, distanceMax = 2, volume = 0.80, }
+    }
 }

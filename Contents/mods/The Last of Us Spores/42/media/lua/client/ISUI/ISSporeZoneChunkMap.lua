@@ -97,6 +97,16 @@ function ISSporeZoneChunkMap:addSlider(id,name,x,y,min,max,step,shift,default,sl
 end
 
 
+
+function ISSporeZoneChunkMap:zoomIn()
+    self.mapPanel:onMouseWheel(-1,true)
+end
+
+function ISSporeZoneChunkMap:zoomOut()
+    self.mapPanel:onMouseWheel(1,true)
+end
+
+
 --[[ ================================================ ]]--
 --- RENDERING ---
 --[[ ================================================ ]]--
@@ -127,26 +137,34 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
     local x,y = 80,550
     local limitedUserMode = self.limitedUserMode
 
-    --- TEXTURES ---
+    --- CLOSE BUTTON ---
 
-    local uiSize,quit_x,quit_y,quit_w,quit_h
-    local grid_corner_UI = self.grid_corner_UI
+    -- define coordinates and dimensions
+    local quit_button = self.quit_button
+    local quit_x = limitedUserMode and quit_button.x or 0
+    local quit_y = limitedUserMode and quit_button.y or 0
+    local quit_w = limitedUserMode and quit_button.w or BUTTON_WDT
+    local quit_h = limitedUserMode and quit_button.h or BUTTON_HGT
+
+    -- create button
+    local _, closeButton = ISDebugUtils.addButton(self,"close",quit_x,quit_y, quit_w,quit_h, "Close", ISSporeZoneChunkMap.onClickClose)
+    self.closeButton = closeButton
+
     if limitedUserMode then
-        uiSize = grid_corner_UI.grid_size
-        local quit_button = self.quit_button
-        quit_x = quit_button.x
-        quit_y = quit_button.y
-        quit_w = quit_button.w
-        quit_h = quit_button.h
-    else
-        uiSize = 500
-        quit_x = 0
-        quit_y = 0
-        quit_w = BUTTON_WDT
-        quit_h = BUTTON_HGT
+        -- make button partially visible
+        closeButton.backgroundColor.a = 0
+        closeButton.borderColor = {r=1, g=0, b=0, a=1}
+        closeButton.title = nil
     end
 
+
+
+
     --- CREATE GRID MAP VIEW ---
+
+    local grid_corner_UI = self.grid_corner_UI
+    local uiSize = limitedUserMode and grid_corner_UI.grid_size or 500
+
     self.mapPanel = TLOU_Spores.GridMapSporeZone:new(grid_corner_UI.x, grid_corner_UI.y, uiSize, self.maxMapRange, limitedUserMode)
 	self.mapPanel:initialise();
 	self.mapPanel:instantiate();
@@ -154,16 +172,10 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
 	self.mapPanel:setAnchorRight(true);
 	self:addChild(self.mapPanel)
 
-    --- CLOSE BUTTON ---
-    local _, closeButton = ISDebugUtils.addButton(self,"close",quit_x,quit_y, quit_w,quit_h, "Close", ISSporeZoneChunkMap.onClickClose)
-    self.closeButton = closeButton
 
-    if limitedUserMode then
-        closeButton.backgroundColor.a = 0
-        closeButton.borderColor = {r=1, g=0, b=0, a=1}
-        closeButton.title = nil
-    end
 
+
+    --- NOISE MAP TOOLS
     if not limitedUserMode then
         --- NOISE THRESHOLD SLIDER ---
         self:addSlider("noiseThreshold","Noise threshold",x,y,0,1,0.1,0.1,TLOU_Spores.NOISE_SPORE_THRESHOLD,ISSporeZoneChunkMap.onNoiseThresholdSliderChange)
@@ -184,6 +196,49 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
         self:addChild(self.mapPanel.gridBoolean)
         self.mapPanel.gridBoolean:addOption(getText("Grid: "));
         self.mapPanel.gridBoolean.selected[1] = true
+
+
+
+    --- LIMITED USER MODE ---
+    else
+        -- make close button partially visible
+        closeButton.backgroundColor.a = 0
+        closeButton.borderColor = {r=1, g=1, b=1, a=1}
+        closeButton.title = nil
+
+
+        --- ZOOM BUTTONS
+
+        -- zoom in button
+        local zoom_in_button = self.zoom_in_button
+        local zoom_in_x = limitedUserMode and zoom_in_button.x or 0
+        local zoom_in_y = limitedUserMode and zoom_in_button.y or BUTTON_HGT + UI_BORDER_SPACING
+        local zoom_in_w = limitedUserMode and zoom_in_button.w or BUTTON_WDT
+        local zoom_in_h = limitedUserMode and zoom_in_button.h or BUTTON_HGT
+
+        -- create button
+        local _, zoomInButton = ISDebugUtils.addButton(self,"zoomIn",zoom_in_x,zoom_in_y, zoom_in_w,zoom_in_h, "+", self.zoomIn)
+        self.zoomInButton = zoomInButton
+
+        zoomInButton.backgroundColor.a = 0
+        zoomInButton.borderColor = {r=1, g=1, b=1, a=1}
+        zoomInButton.title = nil
+
+        -- zoom out button
+        local zoom_out_button = self.zoom_out_button
+        local zoom_out_x = limitedUserMode and zoom_out_button.x or 0
+        local zoom_out_y = limitedUserMode and zoom_out_button.y or BUTTON_HGT*2 + UI_BORDER_SPACING*2
+        local zoom_out_w = limitedUserMode and zoom_out_button.w or BUTTON_WDT
+        local zoom_out_h = limitedUserMode and zoom_out_button.h or BUTTON_HGT
+
+        -- create button
+        local _, zoomOutButton = ISDebugUtils.addButton(self,"zoomOut",zoom_out_x,zoom_out_y, zoom_out_w,zoom_out_h, "-", self.zoomOut)
+        self.zoomOutButton = zoomOutButton
+
+        zoomOutButton.backgroundColor.a = 0
+        zoomOutButton.borderColor = {r=1, g=1, b=1, a=1}
+        zoomOutButton.title = nil
+
     end
 end
 
@@ -224,6 +279,17 @@ function ISSporeZoneChunkMap:new(x, y, maxMapRange, limitedUserMode, scanner)
         local quit_button_1 = textureBackground.quit_button_corner_1
         local quit_button_2 = textureBackground.quit_button_corner_2
         o.quit_button = {x = quit_button_1.x * ratio, y = quit_button_1.y * ratio, w = (quit_button_2.x - quit_button_1.x) * ratio, h = (quit_button_2.y - quit_button_1.y) * ratio}
+
+
+        -- zoom in button coordinates
+        local zoom_in_button_1 = textureBackground.zoom_in_button_corner_1
+        local zoom_in_button_2 = textureBackground.zoom_in_button_corner_2
+        o.zoom_in_button = {x = zoom_in_button_1.x * ratio, y = zoom_in_button_1.y * ratio, w = (zoom_in_button_2.x - zoom_in_button_1.x) * ratio, h = (zoom_in_button_2.y - zoom_in_button_1.y) * ratio}
+
+        -- zoom out button coordinates
+        local zoom_out_button_1 = textureBackground.zoom_out_button_corner_1
+        local zoom_out_button_2 = textureBackground.zoom_out_button_corner_2
+        o.zoom_out_button = {x = zoom_out_button_1.x * ratio, y = zoom_out_button_1.y * ratio, w = (zoom_out_button_2.x - zoom_out_button_1.x) * ratio, h = (zoom_out_button_2.y - zoom_out_button_1.y) * ratio}
 
         -- window size
         o.width = o.new_w

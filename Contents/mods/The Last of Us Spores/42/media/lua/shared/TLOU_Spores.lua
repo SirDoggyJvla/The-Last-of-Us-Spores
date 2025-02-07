@@ -146,6 +146,7 @@ TLOU_Spores.OnTick = function(ticks)
 end
 
 TLOU_Spores.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
+    local player = getSpecificPlayer(playerIndex)
     for i = 1,#items do
 		-- retrieve the item
 		local item = items[i]
@@ -154,13 +155,70 @@ TLOU_Spores.OnFillInventoryObjectContextMenu = function(playerIndex, context, it
         end
 
 
+        --- ITEM CAN SCAN ---
+        if not TLOU_Spores.SCANNERS_ITEMS[item:getFullType()] then
+            return
+        end
+
+        local equiped = player:getPrimaryHandItem() == item or player:getSecondaryHandItem() == item
+        local activated = item:isActivated()
+        local charged  = item:getUseDelta() > 0
 
 
-        --- ITEM CAN HAVE MAP ---
+
+        --- ITEM CAN HAVE CONCENTRATION READINGS ---
+
+        local concentrationPrecision = TLOU_Spores.SCANNERS_VALID_FOR_CONCENTRATION_READINGS[item:getFullType()]
+        if concentrationPrecision then
+            local option = context:addOption("Get spore concentration readings", player, TLOU_Spores.StartSporeConcentrationReadings, item, concentrationPrecision)
+            if not equiped then
+                option.notAvailable = true
+                local tooltip = ISWorldObjectContextMenu.addToolTip()
+                tooltip.description = getText("Tooltip_SporesScanner_needEquiping")
+                option.toolTip = tooltip
+            elseif not activated then
+                option.notAvailable = true
+                local tooltip = ISWorldObjectContextMenu.addToolTip()
+                tooltip.description = getText("Tooltip_SporesScanner_needActivating")
+                option.toolTip = tooltip
+            elseif not charged then
+                option.notAvailable = true
+                local tooltip = ISWorldObjectContextMenu.addToolTip()
+                tooltip.description = getText("Tooltip_SporesScanner_needCharging")
+                option.toolTip = tooltip
+            else
+                local toolTip = ISWorldObjectContextMenu.addToolTip()
+                toolTip.description = string.format(getText("Tooltip_SporesScanner_concentrationPrecision"),concentrationPrecision)
+                option.toolTip = toolTip
+            end
+        end
+
+
+        --- SCANNER HAS MAP ---
 
         local mapRange = TLOU_Spores.SCANNERS_VALID_FOR_MAP[item:getFullType()]
         if mapRange then
             local option = context:addOption("Show spore concentration map", mapRange, TLOU_Spores.ShowSporeConcentrationMap, item)
+            if not equiped then
+                option.notAvailable = true
+                local tooltip = ISWorldObjectContextMenu.addToolTip()
+                tooltip.description = getText("Tooltip_SporesScanner_needEquiping")
+                option.toolTip = tooltip
+            elseif not activated then
+                option.notAvailable = true
+                local tooltip = ISWorldObjectContextMenu.addToolTip()
+                tooltip.description = getText("Tooltip_SporesScanner_needActivating")
+                option.toolTip = tooltip
+            elseif not charged then
+                option.notAvailable = true
+                local tooltip = ISWorldObjectContextMenu.addToolTip()
+                tooltip.description = getText("Tooltip_SporesScanner_needCharging")
+                option.toolTip = tooltip
+            else
+                local toolTip = ISWorldObjectContextMenu.addToolTip()
+                toolTip.description = string.format(getText("Tooltip_SporesScanner_mapRange"),mapRange)
+                option.toolTip = toolTip
+            end
         end
     end
 end

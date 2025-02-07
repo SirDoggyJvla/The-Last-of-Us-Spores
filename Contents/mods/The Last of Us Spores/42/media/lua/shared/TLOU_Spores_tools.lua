@@ -17,6 +17,7 @@ local TLOU_Spores = require "TLOU_Spores_module"
 local DoggyAPI = require "DoggyAPI_module"
 local DoggyAPI_NOISEMAP = DoggyAPI.NOISEMAP
 local DoggyAPI_FINDERS = DoggyAPI.FINDERS
+local DoggyAPI_WORLD = DoggyAPI.WORLD
 
 -- random
 local GENERAL_RANDOM = newrandom()
@@ -32,30 +33,6 @@ local SEEDS = TLOU_Spores.SEEDS
 --- BUILDING IDENTIFICATION ---
 --[[ ================================================ ]]--
 
----Used to get a persistent identification of a building.
----@param buildingDef BuildingDef
----@return integer
----@return integer
----@return integer
-TLOU_Spores.getBuildingID = function(buildingDef)
-    -- get a X and Y coordinate
-    local x_bID = buildingDef:getX()
-    local y_bID = buildingDef:getY()
-
-    -- get a Z coordinate
-    local firstRoom = buildingDef:getFirstRoom()
-    local z_bID = firstRoom and firstRoom:getZ() or 0
-
-    return x_bID,y_bID,z_bID
-end
-
----Retrieves the room ID based on its coordinates x,y,z.
----@param roomDef RoomDef
----@return string
-TLOU_Spores.GetRoomID = function(roomDef)
-    return roomDef:getX().."x"..roomDef:getY().."x"..roomDef:getZ()
-end
-
 ---Used to get a list of rooms in a building and their coordinates.
 ---@param roomDefs ArrayList
 ---@return table
@@ -70,7 +47,7 @@ TLOU_Spores.MapBuildingRooms = function(roomDefs)
         if not square or square:HasStairs() then break end
 
         -- get room ID
-        local roomID = TLOU_Spores.GetRoomID(roomDef)
+        local roomID = DoggyAPI_WORLD.GetRoomID(roomDef)
 
         -- register the room
         table.insert(roomIDs,roomID)
@@ -130,7 +107,7 @@ TLOU_Spores.IsSquareSporeZone = function(square)
     if not roomDef then return false end
 
     -- get room ID
-    local roomID = TLOU_Spores.GetRoomID(roomDef)
+    local roomID = DoggyAPI_WORLD.GetRoomID(roomDef)
     local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
 
     -- check if room has spores
@@ -143,20 +120,35 @@ end
 --- SPORE ZONE SETTER ---
 --[[ ================================================ ]]--
 
+TLOU_Spores.GetChunkSporeConcentration = function(chunk)
+    -- get building spore map concentration
+    local noiseValue = DoggyAPI_NOISEMAP.getNoiseValue(
+        chunk.wx, chunk.wy,
+        TLOU_Spores.NOISE_MAP_SCALE,
+        TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,
+        SEEDS.x_seed,SEEDS.y_seed,SEEDS.offset_seed
+    )
+
+    -- threshold can be decided by user in sandbox options
+    local spore_concentration = noiseValue - TLOU_Spores.NOISE_SPORE_THRESHOLD
+
+    return spore_concentration
+end
+
+TLOU_Spores.GetBuildingSporeConcentration = function(x_bID,y_bID,z_bID)
+    local square = getSquare(x_bID,y_bID,z_bID)
+    local chunk = square:getChunk()
+    local spore_concentration = TLOU_Spores.GetChunkSporeConcentration(chunk)
+
+    return spore_concentration
+end
+
 ---Used to roll for spore zones in the building based on the world noise map.
 ---@param buildingDef any
 ---@param bID any
 TLOU_Spores.RollForSpores = function(buildingDef,bID)
     -- get building spore map concentration
-    local noiseValue = DoggyAPI_NOISEMAP.getNoiseValue(
-        bID.x_bID, bID.y_bID,
-        TLOU_Spores.NOISE_MAP_SCALE,
-        TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,
-        SEEDS.x_seed,SEEDS.y_seed,SEEDS.offset_seed
-    )
-    local spore_concentration = noiseValue - TLOU_Spores.NOISE_SPORE_THRESHOLD
-
-    -- threshold can be decided by user in sandbox options
+    local spore_concentration = TLOU_Spores.GetBuildingSporeConcentration(bID.x_bID,bID.y_bID,bID.z_bID)
     if spore_concentration <= 0 then return end
 
     -- get number of rooms
@@ -326,7 +318,7 @@ TLOU_Spores.CheckInSpores = function(character)
     local inSpores = false
     if roomDef then
         -- get room ID
-        local roomID = TLOU_Spores.GetRoomID(roomDef)
+        local roomID = DoggyAPI_WORLD.GetRoomID(roomDef)
         local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
 
         -- check if room has spores
@@ -453,6 +445,34 @@ end
 --- SPORE SCANNER ---
 --[[ ================================================ ]]--
 
+---Test function to recursively find scanners in the inventory.
+---@param item InventoryItem
+---@return any
+TLOU_Spores.isScanner = function(item)
+	return TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[item:getFullType()] ~= nil
+end
+
+---Used to show the spore concentration map.
+---@param mapRange integer
+---@param scanner InventoryItem
+TLOU_Spores.ShowSporeConcentrationMap = function(mapRange, scanner)
+    local x = getCore():getScreenWidth()*0.25 -- Get the screen resolution
+    local y = getCore():getScreenHeight()*0.10 -- Get the screen resolution
+
+    TLOU_Spores.iSSporeZoneChunkMap = TLOU_Spores.ISSporeZoneChunkMap:new(x, y, mapRange, true, scanner)
+    TLOU_Spores.iSSporeZoneChunkMap:initialise()
+    TLOU_Spores.iSSporeZoneChunkMap:addToUIManager()
+end
+
+---Used to get spore concentration readings.
+---@param player any
+---@param scanner any
+---@param concentrationPrecision any
+TLOU_Spores.StartSporeConcentrationReadings = function(player, scanner, concentrationPrecision)
+    ISTimedActionQueue.add(TLOU_Spores_ISScanForSporesConcentration:new(player,scanner,os.time(),concentrationPrecision))
+end
+
+
 TLOU_Spores.ScanForSpores = function(ticks)
     local client_player = getPlayer()
 
@@ -561,21 +581,3 @@ TLOU_Spores.ScanForSpores = function(ticks)
     end
 end
 
-
----Test function to recursively find scanners in the inventory.
----@param item InventoryItem
----@return any
-TLOU_Spores.isScanner = function(item)
-	return TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[item:getFullType()] ~= nil
-end
-
-
-
-TLOU_Spores.ShowSporeConcentrationMap = function(mapRange, scanner)
-    local x = getCore():getScreenWidth()*0.25 -- Get the screen resolution
-    local y = getCore():getScreenHeight()*0.10 -- Get the screen resolution
-
-    TLOU_Spores.iSSporeZoneChunkMap = TLOU_Spores.ISSporeZoneChunkMap:new(x, y, mapRange, true, scanner)
-    TLOU_Spores.iSSporeZoneChunkMap:initialise()
-    TLOU_Spores.iSSporeZoneChunkMap:addToUIManager()
-end

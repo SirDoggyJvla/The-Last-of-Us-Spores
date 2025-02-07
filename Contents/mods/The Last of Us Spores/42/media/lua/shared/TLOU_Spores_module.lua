@@ -105,25 +105,37 @@ local TLOU_Spores = {
     },
 
     --- SCANNERS ---
-    SCANNERS_VALID_FOR_SPORE_DETECTION = {
+    SCANNERS_ITEMS = {
+        ["TLOU.SporesScanner_PremiumCivilian"] = true,
+        ["TLOU.SporesScanner_PremiumMilitary"] = true,
+        ["TLOU.SporesScanner_ValutechMilitary"] = true,
+        ["TLOU.SporesScanner_PharmahugScientific"] = true,
+    },
+    SCANNERS_VALID_FOR_SPORE_DETECTION = { -- the values are the scanner range
         ["TLOU.SporesScanner_PremiumCivilian"] = 7,
         ["TLOU.SporesScanner_ValutechMilitary"] = 20,
     },
-    SCANNERS_VALID_FOR_MAP = {
+    SCANNERS_VALID_FOR_MAP = { -- the values are the map range
         ["TLOU.SporesScanner_PremiumMilitary"] = 5,
     },
-    SCANNERS_VALID_FOR_CONCENTRATION_READINGS = {
+    SCANNERS_VALID_FOR_CONCENTRATION_READINGS = { -- the values are the scanner precision
         ["TLOU.SporesScanner_ValutechMilitary"] = 10,
         ["TLOU.SporesScanner_PharmahugScientific"] = 1,
     },
     SCANNERS_UI_TEXTURE = {
         ["TLOU.SporesScanner_PremiumMilitary"] = {
             texture = getTexture("media/ui/UI_SporesScanner_PremiumMilitary.png"),
-            grid_corner_1 = {x = 200, y = 840},
+            grid_corner_1 = {x = 200, y = 840}, -- grid coordinates for the map
             grid_corner_2 = {x = 462, y = 1106},
 
-            quit_button_corner_1 = {x = 294, y = 1341},
+            quit_button_corner_1 = {x = 294, y = 1341}, -- button for quitting the UI
             quit_button_corner_2 = {x = 387, y = 1428},
+
+            zoom_in_button_corner_1 = {x = 309, y = 1618}, -- button for zooming in
+            zoom_in_button_corner_2 = {x = 370, y = 1664},
+
+            zoom_out_button_corner_1 = {x = 309, y = 1681}, -- button for zooming out
+            zoom_out_button_corner_2 = {x = 370, y = 1726},
         },
     },
 

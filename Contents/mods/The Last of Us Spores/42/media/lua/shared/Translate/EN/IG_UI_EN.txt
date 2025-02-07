@@ -1,0 +1,3 @@
+IGUI_EN = {
+    IGUI_TLOU_Spores_ConcentrationReadings = "Spore concentration in the air: %d %",
+}
