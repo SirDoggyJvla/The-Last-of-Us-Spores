@@ -13,7 +13,7 @@ Defines the timed action of replacing the battery of the InfectionScanner.
 
 require "TimedActions/ISBaseTimedAction"
 
-TLOU_Spores_ISScanForSporesConcentration = ISBaseTimedAction:derive("TLOU_Spores_ISScanForSporesConcentration")
+local ISScanForSporesConcentration = ISBaseTimedAction:derive("ISScanForSporesConcentration")
 
 --- CACHING
 --- -- module
@@ -22,23 +22,23 @@ local TLOU_Spores = require "TLOU_Spores_module"
 -- randomness
 local GENERAL_RANDOM = newrandom()
 
-function TLOU_Spores_ISScanForSporesConcentration:isValid()
+function ISScanForSporesConcentration:isValid()
 	-- local scanner = self.scanner
 	-- return scanner:getUseDelta() > 0 and scanner:isActivated()
 	return true
 end
 
-function TLOU_Spores_ISScanForSporesConcentration:waitToStart()
+function ISScanForSporesConcentration:waitToStart()
 	return false
 end
 
-function TLOU_Spores_ISScanForSporesConcentration:update()
+function ISScanForSporesConcentration:update()
 	if os.time() - self.real_time < 1.4 then return end
 
 	self:forceComplete()
 end
 
-function TLOU_Spores_ISScanForSporesConcentration:start()
+function ISScanForSporesConcentration:start()
 	local character = self.character
 
 	-- play sound of the scanner (automatically synced)
@@ -46,11 +46,11 @@ function TLOU_Spores_ISScanForSporesConcentration:start()
 	addSound(nil, character:getX(), character:getY(), character:getZ(), 7, 7)
 end
 
-function TLOU_Spores_ISScanForSporesConcentration:stop()
+function ISScanForSporesConcentration:stop()
 	ISBaseTimedAction.stop(self);
 end
 
-function TLOU_Spores_ISScanForSporesConcentration:perform()
+function ISScanForSporesConcentration:perform()
 	local character = self.character
 	local scanner = self.scanner
 
@@ -71,7 +71,7 @@ function TLOU_Spores_ISScanForSporesConcentration:perform()
 	ISBaseTimedAction.perform(self)
 end
 
-function TLOU_Spores_ISScanForSporesConcentration:new(character,scanner,real_time,concentrationPrecision)
+function ISScanForSporesConcentration:new(character,scanner,real_time,concentrationPrecision)
 	local o = {}
 	setmetatable(o, self)
 	self.__index = self
@@ -87,3 +87,5 @@ function TLOU_Spores_ISScanForSporesConcentration:new(character,scanner,real_tim
 
 	return o
 end
+
+return ISScanForSporesConcentration

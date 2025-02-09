@@ -45,6 +45,31 @@ TLOU_Spores.OnInitGlobalModData = function()
     local scale = SandboxVars.TLOU_Spores.NoiseMapScale/8
     scale = scale - scale%1 -- no point having a float
     TLOU_Spores.NOISE_MAP_SCALE = scale
+
+
+    --- SANDBOX OPTIONS
+
+    -- these below is for compatibility with mods that add new scanners
+    -- doesn't take into account the case where no sandbox option is given for the new scanners
+    local SANDBOX_OPTIONS_SETUP = TLOU_Spores.SANDBOX_OPTIONS_SETUP
+
+    -- map
+    for itemFullType,option in pairs(SANDBOX_OPTIONS_SETUP.MAP) do
+        local value = SandboxVars.TLOU_Spores[option]
+        TLOU_Spores.SCANNERS_VALID_FOR_MAP[itemFullType] = value ~= 0 and value or nil
+    end
+
+    -- Spore detector
+    for itemFullType,option in pairs(SANDBOX_OPTIONS_SETUP.SPORE_DETECTOR) do
+        local value = SandboxVars.TLOU_Spores[option]
+        TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[itemFullType] = value ~= 0 and value or nil
+    end
+
+    -- concentration readings
+    for itemFullType,option in pairs(SANDBOX_OPTIONS_SETUP.CONCENTRATION_READING) do
+        local value = SandboxVars.TLOU_Spores[option]
+        TLOU_Spores.SCANNERS_VALID_FOR_CONCENTRATION_READINGS[itemFullType] = value ~= -1 and value or nil
+    end
 end
 
 TLOU_Spores.OnSave = function()
@@ -118,6 +143,7 @@ TLOU_Spores.OnTick = function(ticks)
     local y = next_coordinate_check.y
     local z = next_coordinate_check.z
 
+    local wrongInitialization,buildingDef
     repeat -- used to break instead of return
         -- access square
         local square = chunk:getGridSquare(x, y, z)
@@ -130,19 +156,23 @@ TLOU_Spores.OnTick = function(ticks)
         MODDATA_SPORES_BUILDINGS = MODDATA_SPORES_BUILDINGS or ModData.getOrCreate("TLOU_Spores_buildings")
 
         -- check if building was generated for spores
-        local buildingDef = building:getDef()
+        buildingDef = building:getDef()
         local x_bID,y_bID,z_bID = DoggyAPI_WORLD.getBuildingID(buildingDef)
         local buildingID = x_bID.."x"..y_bID.."x"..z_bID
         if MODDATA_SPORES_BUILDINGS[buildingID] then break end
 
-        MODDATA_SPORES_BUILDINGS[buildingID] = true
-
-
-        TLOU_Spores.RollForSpores(buildingDef,{x_bID = x_bID,y_bID = y_bID,z_bID = z_bID,buildingID = buildingID})
+        -- we verify the building was successfully identified, if not it needs to be checked later
+        wrongInitialization = TLOU_Spores.RollForSpores(buildingDef,{x_bID = x_bID,y_bID = y_bID,z_bID = z_bID,buildingID = buildingID})
+        MODDATA_SPORES_BUILDINGS[buildingID] = wrongInitialization
     until true
 
     -- remove entry from table
-    table.remove(CHECK_COORDINATES, 1)
+    if not wrongInitialization then
+        table.remove(CHECK_COORDINATES, 1)
+    else
+        -- check again later but put last to check other buildings
+        table.insert(CHECK_COORDINATES, table.remove(CHECK_COORDINATES, 1))
+    end
 end
 
 TLOU_Spores.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
@@ -162,7 +192,7 @@ TLOU_Spores.OnFillInventoryObjectContextMenu = function(playerIndex, context, it
 
         local equiped = player:getPrimaryHandItem() == item or player:getSecondaryHandItem() == item
         local activated = item:isActivated()
-        local charged  = item:getUseDelta() > 0
+        local charged  = item:getCurrentUsesFloat() > 0
 
 
 

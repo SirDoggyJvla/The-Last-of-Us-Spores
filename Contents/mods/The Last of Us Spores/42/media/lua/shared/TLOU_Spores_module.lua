@@ -111,17 +111,17 @@ local TLOU_Spores = {
         ["TLOU.SporesScanner_ValutechMilitary"] = true,
         ["TLOU.SporesScanner_PharmahugScientific"] = true,
     },
-    SCANNERS_VALID_FOR_SPORE_DETECTION = { -- the values are the scanner range
-        ["TLOU.SporesScanner_PremiumCivilian"] = 7,
-        ["TLOU.SporesScanner_ValutechMilitary"] = 20,
-    },
-    SCANNERS_VALID_FOR_MAP = { -- the values are the map range
-        ["TLOU.SporesScanner_PremiumMilitary"] = 5,
-    },
-    SCANNERS_VALID_FOR_CONCENTRATION_READINGS = { -- the values are the scanner precision
-        ["TLOU.SporesScanner_ValutechMilitary"] = 10,
-        ["TLOU.SporesScanner_PharmahugScientific"] = 1,
-    },
+
+    -- the values are the scanner range
+    SCANNERS_VALID_FOR_SPORE_DETECTION = {},
+
+    -- the values are the map range
+    SCANNERS_VALID_FOR_MAP = {},
+
+    -- the values are the scanner precision
+    SCANNERS_VALID_FOR_CONCENTRATION_READINGS = {},
+
+    -- scanner map ui settings
     SCANNERS_UI_TEXTURE = {
         ["TLOU.SporesScanner_PremiumMilitary"] = {
             texture = getTexture("media/ui/UI_SporesScanner_PremiumMilitary.png"),
@@ -136,6 +136,28 @@ local TLOU_Spores = {
 
             zoom_out_button_corner_1 = {x = 309, y = 1681}, -- button for zooming out
             zoom_out_button_corner_2 = {x = 370, y = 1726},
+        },
+    },
+
+    --- SANDBOX OPTIONS ---
+    SANDBOX_OPTIONS_SETUP = {
+        MAP = {
+            ["TLOU.SporesScanner_PremiumMilitary"] = "SporesScanner_PremiumMilitary_Map",
+            ["TLOU.SporesScanner_PremiumCivilian"] = "SporesScanner_PremiumCivilian_Map",
+            ["TLOU.SporesScanner_ValutechMilitary"] = "SporesScanner_ValutechMilitary_Map",
+            ["TLOU.SporesScanner_PharmahugScientific"] = "SporesScanner_PharmahugScientific_Map",
+        },
+        SPORE_DETECTOR = {
+            ["TLOU.SporesScanner_PremiumMilitary"] = "SporesScanner_PremiumMilitary_SporeDetector",
+            ["TLOU.SporesScanner_PremiumCivilian"] = "SporesScanner_PremiumCivilian_SporeDetector",
+            ["TLOU.SporesScanner_ValutechMilitary"] = "SporesScanner_ValutechMilitary_SporeDetector",
+            ["TLOU.SporesScanner_PharmahugScientific"] = "SporesScanner_PharmahugScientific_SporeDetector",
+        },
+        CONCENTRATION_READING = {
+            ["TLOU.SporesScanner_PremiumMilitary"] = "SporesScanner_PremiumMilitary_ConcentrationReading",
+            ["TLOU.SporesScanner_PremiumCivilian"] = "SporesScanner_PremiumCivilian_ConcentrationReading",
+            ["TLOU.SporesScanner_ValutechMilitary"] = "SporesScanner_ValutechMilitary_ConcentrationReading",
+            ["TLOU.SporesScanner_PharmahugScientific"] = "SporesScanner_PharmahugScientific_ConcentrationReading",
         },
     },
 
@@ -155,5 +177,11 @@ local TLOU_Spores = {
         highlightSquaresBoolean = false,
     },
 }
+
+-- add battery handling for every scanners, done here in-case other outside scanners are added
+local BatteryHandler = require "DoggyTools/DoggyAPI_BatteryHandler"
+for scannerFullType, _ in pairs(TLOU_Spores.SCANNERS_ITEMS) do
+    BatteryHandler.AddBatteryItem(scannerFullType)
+end
 
 return TLOU_Spores

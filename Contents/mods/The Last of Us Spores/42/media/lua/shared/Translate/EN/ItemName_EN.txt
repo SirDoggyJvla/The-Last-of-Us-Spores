@@ -1,0 +1,6 @@
+ItemName_EN = {
+    ItemName_TLOU.SporesScanner_PremiumMilitary = "Premium Military Spore Scanner",
+    ItemName_TLOU.SporesScanner_PremiumCivilian = "Premium Civilian Spore Scanner",
+    ItemName_TLOU.SporesScanner_ValutechMilitary = "Valutech Military Spore Scanner",
+    ItemName_TLOU.SporesScanner_PharmahugScientific = "Pharmahug Scientific Spore Scanner",
+}

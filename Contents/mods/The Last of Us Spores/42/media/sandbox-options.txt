@@ -6,7 +6,7 @@ VERSION = 1,
 option TLOU_Spores.NoiseMapScale
 {
 	type = integer, 
-	min = 8, 
+	min = 2, 
 	max = 10000, 
 	default = 200,
 	page = TLOU_Spores,
@@ -75,4 +75,139 @@ option TLOU_Spores.SporesInfectionStrength // in minutes
 	default = 120,
 	page = TLOU_Spores,
 	translation = TLOU_Spores_SporesInfectionStrength,
+}
+
+
+
+/*---------------------------------------------------------------------
+-- SCANNER STATS
+---------------------------------------------------------------------*/
+
+option TLOU_Spores.SporesScanner_PremiumMilitary_Map
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 5,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PremiumMilitary_Map,
+}
+
+option TLOU_Spores.SporesScanner_PremiumMilitary_SporeDetector
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 0,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PremiumMilitary_SporeDetector,
+}
+
+option TLOU_Spores.SporesScanner_PremiumMilitary_ConcentrationReading
+{
+	type = integer, 
+	min = -1, 
+	max = 100, 
+	default = -1,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PremiumMilitary_ConcentrationReading,
+}
+
+
+
+
+option TLOU_Spores.SporesScanner_PremiumCivilian_Map
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 0,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PremiumCivilian_Map,
+}
+
+option TLOU_Spores.SporesScanner_PremiumCivilian_SporeDetector
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 7,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PremiumCivilian_SporeDetector,
+}
+
+option TLOU_Spores.SporesScanner_PremiumCivilian_ConcentrationReading
+{
+	type = integer, 
+	min = -1, 
+	max = 100, 
+	default = -1,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PremiumCivilian_ConcentrationReading,
+}
+
+
+
+
+option TLOU_Spores.SporesScanner_ValutechMilitary_Map
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 0,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_ValutechMilitary_Map,
+}
+
+option TLOU_Spores.SporesScanner_ValutechMilitary_SporeDetector
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 20,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_ValutechMilitary_SporeDetector,
+}
+
+option TLOU_Spores.SporesScanner_ValutechMilitary_ConcentrationReading
+{
+	type = integer, 
+	min = -1, 
+	max = 100, 
+	default = 10,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_ValutechMilitary_ConcentrationReading,
+}
+
+
+
+
+option TLOU_Spores.SporesScanner_PharmahugScientific_Map
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 0,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PharmahugScientific_Map,
+}
+
+option TLOU_Spores.SporesScanner_PharmahugScientific_SporeDetector
+{
+	type = integer, 
+	min = 0, 
+	max = 50, 
+	default = 0,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PharmahugScientific_SporeDetector,
+}
+
+option TLOU_Spores.SporesScanner_PharmahugScientific_ConcentrationReading
+{
+	type = integer, 
+	min = -1, 
+	max = 100, 
+	default = 1,
+	page = TLOU_Spores,
+	translation = TLOU_Spores_SporesScanner_PharmahugScientific_ConcentrationReading,
 }

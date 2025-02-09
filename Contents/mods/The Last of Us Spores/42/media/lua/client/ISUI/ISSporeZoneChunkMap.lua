@@ -113,9 +113,16 @@ end
 
 function ISSporeZoneChunkMap:prerender() -- Call before render, it's for harder stuff that need init, ect
     ISPanel.prerender(self)
-    self:drawTextureScaled(self.texture, 0 , 0, self.new_w, self.new_h, 1, 1, 1, 1)
     if not self.limitedUserMode then
-        self:drawText("Noise map inspector",100,0,1,1,1,1, UIFont.Large) -- You can put it in render() too
+        self:drawText("Spore concentration noise map inspector",100,0,1,1,1,1, UIFont.Large) -- You can put it in render() too
+    else
+        self:drawTextureScaled(self.texture, 0 , 0, self.new_w, self.new_h, 1, 1, 1, 1)
+    end
+
+    -- close UI if scanner is not charged
+    local scanner = self.scanner
+    if not scanner:isActivated() or scanner:getCurrentUsesFloat() <= 0 then
+        self:close()
     end
 end
 
@@ -164,8 +171,10 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
 
     local grid_corner_UI = self.grid_corner_UI
     local uiSize = limitedUserMode and grid_corner_UI.grid_size or 500
+    local grid_x = limitedUserMode and grid_corner_UI.x or 25
+    local grid_y = limitedUserMode and grid_corner_UI.y or BUTTON_HGT + UI_BORDER_SPACING
 
-    self.mapPanel = TLOU_Spores.GridMapSporeZone:new(grid_corner_UI.x, grid_corner_UI.y, uiSize, self.maxMapRange, limitedUserMode)
+    self.mapPanel = TLOU_Spores.GridMapSporeZone:new(grid_x, grid_y, uiSize, self.maxMapRange, limitedUserMode)
 	self.mapPanel:initialise();
 	self.mapPanel:instantiate();
 	self.mapPanel:setAnchorLeft(false);
@@ -190,12 +199,12 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
         self:addSlider("maximumNoiseVectorValue","Maximum noise vector value",x,y + BUTTON_HGT*3 + UI_BORDER_SPACING*3,-5,5,1,1,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,ISSporeZoneChunkMap.onMaximumNoiseVectorValueSliderChange)
 
 
-        --- GRID BOOLEAN ---
-        self.mapPanel.gridBoolean = ISTickBox:new(400,5, 200, BUTTON_HGT,"Grid: ",self)
-        self.mapPanel.gridBoolean:initialise()
-        self:addChild(self.mapPanel.gridBoolean)
-        self.mapPanel.gridBoolean:addOption(getText("Grid: "));
-        self.mapPanel.gridBoolean.selected[1] = true
+        -- --- GRID BOOLEAN ---
+        -- self.mapPanel.gridBoolean = ISTickBox:new(450,5, 200, BUTTON_HGT,"Grid: ",self)
+        -- self.mapPanel.gridBoolean:initialise()
+        -- self:addChild(self.mapPanel.gridBoolean)
+        -- self.mapPanel.gridBoolean:addOption(getText("Grid: "));
+        -- self.mapPanel.gridBoolean.selected[1] = true
 
 
 
@@ -304,12 +313,13 @@ function ISSporeZoneChunkMap:new(x, y, maxMapRange, limitedUserMode, scanner)
 
     o.maxMapRange = maxMapRange
     o.limitedUserMode = limitedUserMode
+    o.scanner = scanner
 
     if limitedUserMode then
         o.borderColor = {r=0.4, g=0.4, b=0.4, a=0}
         o.backgroundColor = {r=0, g=0, b=0, a=0}
     else
-        o.backgroundColor.a = 0
+        o.backgroundColor.a = 0.8
     end
 
     return o

@@ -19,8 +19,6 @@ require "TLOU_Spores"
 local DoggyAPI = require "DoggyAPI_module"
 local EVENTS = DoggyAPI.EVENTS
 
-require "DoggyAPI_LoadNewChunk"
-
 -- game starting
 Events.OnInitGlobalModData.Add(TLOU_Spores.OnInitGlobalModData)
 
@@ -31,6 +29,7 @@ Events.OnSave.Add(TLOU_Spores.OnSave)
 Events.OnNewGame.Add(TLOU_Spores.OnNewGame)
 
 -- new chunk getting loaded in
+require "DoggyEvents/DoggyAPI_LoadNewChunk"
 EVENTS.LoadNewChunk:addListener(TLOU_Spores.LoadNewChunk)
 
 -- every ticks
