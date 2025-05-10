@@ -16,8 +16,9 @@ if not isDebugEnabled() then return end
 
 -- requirements
 local TLOU_Spores = require "TLOU_Spores_module"
-local DoggyAPI = require "DoggyAPI_module"
-local DoggyAPI_WORLD = DoggyAPI.WORLD
+
+-- DoggyAPI
+local WorldTools = require "DoggyTools/WorldTools"
 
 --- CACHING
 -- player
@@ -38,7 +39,7 @@ TLOU_Spores.DEBUG.OnFillWorldObjectContextMenu = function(playerIndex, context, 
     -- skip if no square found
     if not square then return end
 
-    -- create the submenu for Immersive Hunting debug
+    -- create the submenu for TLOU Spores debug
     local option = context:addOptionOnTop("TLOU Spores: Debug")
     local subMenu = context:getNew(context)
     context:addSubMenu(option, subMenu)
@@ -70,11 +71,19 @@ TLOU_Spores.DEBUG.OnFillWorldObjectContextMenu = function(playerIndex, context, 
     --- HIDE NOISE MAP ---
     subMenu:addOption("Hide noise map",nil,function() TLOU_Spores.iSSporeZoneChunkMap:setVisible(false) TLOU_Spores.iSSporeZoneChunkMap:removeFromUIManager() end)
 
+    --- RESET SPORES INFECTION STATUS ---
     subMenu:addOption("Reset spores infection",nil,TLOU_Spores.DEBUG.ResetSporesInfection)
+
+    --- RESET SPORES OVERLAY ---
+    subMenu:addOption("Reset spores overlay",nil,TLOU_Spores.DEBUG.ResetSporesOverlay)
+end
+
+TLOU_Spores.DEBUG.ResetSporesOverlay = function()
+    TLOU_Spores.Active_Spores_Overlay = nil
 end
 
 TLOU_Spores.DEBUG.ResetSporeZones = function()
-    ModData.remove("DoggyAPI_NewChunk")
+    ModData.remove("DoggyAPI_AlreadyLoadedChunks")
     ModData.remove("TLOU_Spores_buildings")
     ModData.remove("TLOU_Spores_rooms")
 
@@ -126,33 +135,14 @@ TLOU_Spores.DEBUG.AddHighlightSquare = function(square, ISColors)
 end
 
 TLOU_Spores.DEBUG.OnKeyPressed = function(key)
-
-
     if(key == 27) then -- $
-        local square = getPlayer():getSquare()
-        if not square then return end
+    print("pass")
+        local building = getPlayer():getBuilding()
+        if not building then return end
 
-        local objects = square:getObjects()
-        for i = 0, objects:size() - 1 do repeat
-            local object = objects:get(i)
-            local sprite = object:getSprite()
-            if sprite then
-                local properties = sprite:getProperties()
+        local buildingDef = building:getDef()
 
-                local direction = properties:Is("WallN") and "WALLS_NORTH"
-                    or properties:Is("WallW") and "WALLS_WEST"
-                    or properties:Is("WallNW") and newrandom():random(0,1) == 1 and ("WALLS_NORTH" or "WALLS_WEST")
-
-                if not direction then break end
-
-                local possibleTiles = TLOU_Spores.FRESH_SPORE_TILES[direction].MUSHROOM_SMALL
-                local choiceTile = possibleTiles[newrandom():random(1,#possibleTiles)]
-                print(choiceTile)
-
-                local isoObject = IsoObject.new(getCell(), square, "kokoz_ptlourp_graf_35")
-                square:AddTileObject(isoObject)
-            end
-        until true end
+        TLOU_Spores.RollForSpores(buildingDef,1)
     end
 end
 
@@ -162,10 +152,7 @@ TLOU_Spores.DEBUG.OnObjectLeftMouseButtonDown = function(object,x,y)
     if not building then return end
 
     local buildingDef = building:getDef()
-    local x_bID,y_bID,z_bID = DoggyAPI_WORLD.getBuildingID(buildingDef)
-    local buildingID = x_bID.."x"..y_bID.."x"..z_bID
-
-    TLOU_Spores.RollForSpores(buildingDef,{x_bID = x_bID,y_bID = y_bID,z_bID = z_bID,buildingID = buildingID})
+    TLOU_Spores.RollForSpores(buildingDef)
 end
 
 ---Render squares in the list and remove them based on conditions.

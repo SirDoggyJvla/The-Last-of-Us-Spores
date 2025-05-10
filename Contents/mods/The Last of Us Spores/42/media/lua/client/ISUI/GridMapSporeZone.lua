@@ -13,8 +13,9 @@ GridMapSporeZone file of TLOU Spores. Used to show a map of spore zones.
 
 --- REQUIREMENTS
 local TLOU_Spores = require "TLOU_Spores_module"
-local DoggyAPI = require "DoggyAPI_module"
-local DoggyAPI_NOISEMAP = DoggyAPI.NOISEMAP
+
+-- DoggyAPI
+local NoiseMap = require "DoggyTools/NoiseMap"
 
 -- vanilla
 require "ISUI/ISPanel"
@@ -33,8 +34,6 @@ end
 
 function GridMapSporeZone:prerender() -- Call before render, it's for harder stuff that need init, ect
     local player = getPlayer()
-    local chunk = player:getChunk()
-    if not chunk then return end
 
 	-- get offset
 	local offsetX, offsetY
@@ -118,14 +117,16 @@ function GridMapSporeZone:prerender() -- Call before render, it's for harder stu
 
 
     -- draw player chunk
-    local player_chunk = player:getChunk()
-    local player_wx = player_chunk.wx
-    local player_wy = player_chunk.wy
-    if player_wx >= min_wx and player_wx <= max_wx and player_wy >= min_wy and player_wy <= max_wy then
-        local x = corner_x + (player_wx - min_wx) * size
-        local y = corner_y + (player_wy - min_wy) * size
-        self:drawRectBorder(x, y, size, size, 1, 1, 0, 0)
-    end
+	if player then
+		local player_chunk = player:getChunk()
+		local player_wx = player_chunk.wx
+		local player_wy = player_chunk.wy
+		if player_wx >= min_wx and player_wx <= max_wx and player_wy >= min_wy and player_wy <= max_wy then
+			local x = corner_x + (player_wx - min_wx) * size
+			local y = corner_y + (player_wy - min_wy) * size
+			self:drawRectBorder(x, y, size, size, 1, 1, 0, 0)
+		end
+	end
 
     -- self:drawRectBorder(corner_x, corner_y, total_size, total_size, 1, 1, 0, 0)
 end
@@ -142,11 +143,11 @@ end
 function GridMapSporeZone:populateSporeZones(wx, wy, NOISE_MAP_SCALE, MINIMUM_NOISE_VECTOR_VALUE, MAXIMUM_NOISE_VECTOR_VALUE)
 	local sporeZones = self.sporeZones
     -- get building spore map concentration
-    local noiseValue = DoggyAPI_NOISEMAP.getNoiseValue(
+    local noiseValue = NoiseMap.getNoiseValue(
         wx, wy,
         NOISE_MAP_SCALE,
         MINIMUM_NOISE_VECTOR_VALUE,MAXIMUM_NOISE_VECTOR_VALUE,
-        SEEDS.x_seed,SEEDS.y_seed,SEEDS.offset_seed
+        SEEDS.x_seed or 69696,SEEDS.y_seed or 420666,SEEDS.offset_seed or 123456
     )
     sporeZones[wx] = sporeZones[wx] or {}
     -- get concentration
@@ -264,10 +265,17 @@ function GridMapSporeZone:create() -- Use to make the elements
 	self.offsetX = 0
 	self.offsetY = 0
 	self.scale = self.maxMapRange or 10
-	self.NOISE_SPORE_THRESHOLD = TLOU_Spores.NOISE_SPORE_THRESHOLD
-	self.NOISE_MAP_SCALE = TLOU_Spores.NOISE_MAP_SCALE
-	self.MINIMUM_NOISE_VECTOR_VALUE = TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE
-	self.MAXIMUM_NOISE_VECTOR_VALUE = TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE
+	if self._sandboxOptions then -- default values if not in a save
+		self.NOISE_SPORE_THRESHOLD = TLOU_Spores.NOISE_SPORE_THRESHOLD or 0.5
+		self.NOISE_MAP_SCALE = TLOU_Spores.NOISE_MAP_SCALE or 1
+		self.MINIMUM_NOISE_VECTOR_VALUE = TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE or -5
+		self.MAXIMUM_NOISE_VECTOR_VALUE = TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE or 5
+	else
+		self.NOISE_SPORE_THRESHOLD = TLOU_Spores.NOISE_SPORE_THRESHOLD
+		self.NOISE_MAP_SCALE = TLOU_Spores.NOISE_MAP_SCALE
+		self.MINIMUM_NOISE_VECTOR_VALUE = TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE
+		self.MAXIMUM_NOISE_VECTOR_VALUE = TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE
+	end
 
 	--- GET DEFAULT MAP COORDINATES ---
 	self:redefineCenterPoint()
@@ -275,7 +283,7 @@ function GridMapSporeZone:create() -- Use to make the elements
 	self.onMouseWheel = GridMapSporeZone.onMouseWheel
 end
 
-function GridMapSporeZone:new(x, y, uiSize, maxMapRange, limitedUserMode)
+function GridMapSporeZone:new(x, y, uiSize, maxMapRange, limitedUserMode, _sandboxOptions)
     local o = {};
     o = ISPanel:new(x, y, uiSize, uiSize)
     setmetatable(o, self)
@@ -285,6 +293,7 @@ function GridMapSporeZone:new(x, y, uiSize, maxMapRange, limitedUserMode)
 
 	o.maxMapRange = maxMapRange
 	o.limitedUserMode = limitedUserMode
+	o._sandboxOptions = _sandboxOptions
 
     return o;
 end

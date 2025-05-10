@@ -11,8 +11,18 @@ Sandbox_EN = {
     -- SPORE ZONE SCALE AND GENERAL CHANCE
     ---------------------------------------------------------------------*/
 
+    Sandbox_TLOU_Spores_NoiseMapButton = "Show Spore Concentration Map",
+    Sandbox_TLOU_Spores_NoiseMapButton_tooltip = "The spore concentration map shows the spore concentration in the area which is used to determine where the spores will spawn on the map. The grid is divided into chunks of 8 tiles and the spore concentration is shown in the range of 0 to 1, where 0 is no spores and 1 is maximum spores. The spore concentration is generated using a noise map, so the spores will be more spread out and randomized.<BR>You can tweak the various settings to see how the spore concentration changes on the map based on the sandbox options.",
+
     Sandbox_TLOU_Spores_NoiseMapScale = "Spore Concentration Scale",
     Sandbox_TLOU_Spores_NoiseMapScale_tooltip = "The scale of the spore concentration. Higher values will make the spore concentration larger and more spread out on the map. Set the value to 2 to get a more randomized spore concentration.",
+    Sandbox_TLOU_Spores_SporeConcentrationThreshold = "Spore Concentration Threshold [%]",
+    Sandbox_TLOU_Spores_SporeConcentrationThreshold_tooltip = "Spores will generate if the spore concentration in the area is higher than this value. Reducing this value will make the spores more common and spread out.",
+    Sandbox_TLOU_Spores_MinimumPercentageOfRoomsWithSpores = "Minimum Percentage of Rooms with Spores [%]",
+    Sandbox_TLOU_Spores_MinimumPercentageOfRoomsWithSpores_tooltip = "The minimum percentage of rooms that must contain spores for them to spawn.",
+    Sandbox_TLOU_Spores_MinimumNoiseVectorValue = "Minimum Noise Vector Value",
+    Sandbox_TLOU_Spores_MinimumNoiseVectorValue_tooltip = "Minimum value of the noise vector used to generate the spore concentration. Increasing this value will make the spore concentration more spread out.",
+
     Sandbox_TLOU_Spores_CustomSeeds = "Custom Seeds",
     Sandbox_TLOU_Spores_CustomSeeds_tooltip = "Use custom seeds for the spore generation. This will make the spore generation deterministic and will generate the same spore concentration every time the map is generated.",
     Sandbox_TLOU_Spores_x_seed = "X Seed",
@@ -40,43 +50,43 @@ Sandbox_EN = {
     ---------------------------------------------------------------------*/
 
     
-    Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_Map = "Premium Military Scanner Map [chunks]",
+    Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_Map = "Map: Premium Military Scanner [chunks]",
     Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_Map_tooltip = "The range of the spore concentration map that the Premium Military Scanner can scan, in chunks (8 tiles). Set to 0 to deactivate the map for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_Map = "Premium Civilian Scanner Map [chunks]",
+    Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_Map = "Map: Premium Civilian Scanner [chunks]",
     Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_Map_tooltip = "The range of the spore concentration map that the Premium Civilian Scanner can scan, in chunks (8 tiles). Set to 0 to deactivate the map for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_Map = "Valutech Military Scanner Map [chunks]",
+    Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_Map = "Map: Valutech Military Scanner [chunks]",
     Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_Map_tooltip = "The range of the spore concentration map that the Valutech Military Scanner can scan, in chunks (8 tiles). Set to 0 to deactivate the map for this scanner.",
     
-    Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_Map = "Pharmahug Scientific Scanner Map [chunks]",
+    Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_Map = "Map: Pharmahug Scientific Scanner [chunks]",
     Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_Map_tooltip = "The range of the spore concentration map that the Pharmahug Scientific Scanner can scan, in chunks (8 tiles). Set to 0 to deactivate the map for this scanner.",
 
 
 
-    Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_SporeDetector = "Premium Military Spore Detector Range [tiles]",
+    Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_SporeDetector = "Spore Detector Range: Premium Military Scanner [tiles]",
     Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_SporeDetector_tooltip = "The range of the spore detector of the Premium Military Scanner, in tiles. Set to 0 to deactivate the spore detector for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_SporeDetector = "Premium Civilian Spore Detector Range [tiles]",
+    Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_SporeDetector = "Spore Detector Range: Premium Civilian Scanner [tiles]",
     Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_SporeDetector_tooltip = "The range of the spore detector of the Premium Civilian Scanner, in tiles. Set to 0 to deactivate the spore detector for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_SporeDetector = "Valutech Military Spore Detector Range [tiles]",
+    Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_SporeDetector = "Spore Detector Range: Valutech Military Scanner [tiles]",
     Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_SporeDetector_tooltip = "The range of the spore detector of the Valutech Military Scanner, in tiles. Set to 0 to deactivate the spore detector for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_SporeDetector = "Pharmahug Scientific Spore Detector Range [tiles]",
+    Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_SporeDetector = "Spore Detector Range: Pharmahug Scientific Scanner [tiles]",
     Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_SporeDetector_tooltip = "The range of the spore detector of the Pharmahug Scientific Scanner, in tiles. Set to 0 to deactivate the spore detector for this scanner.",
 
 
 
-    Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_ConcentrationReading = "Premium Military Spore Concentration Reading Precision [%]",
+    Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_ConcentrationReading = "Concentration Reading Precision: Premium Military Scanner [%]",
     Sandbox_TLOU_Spores_SporesScanner_PremiumMilitary_ConcentrationReading_tooltip = "Precision of the spore concentration reading given by the Premium Military Scanner, expressed in percentage. The given value will be within a range of +/- the given percentage. Set to -1 to deactivate the spore concentration reading for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_ConcentrationReading = "Premium Civilian Spore Concentration Reading Precision [%]",
+    Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_ConcentrationReading = "Concentration Reading Precision: Premium Civilian Scanner [%]",
     Sandbox_TLOU_Spores_SporesScanner_PremiumCivilian_ConcentrationReading_tooltip = "Precision of the spore concentration reading given by the Premium Civilian Scanner, expressed in percentage. The given value will be within a range of +/- the given percentage. Set to -1 to deactivate the spore concentration reading for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_ConcentrationReading = "Valutech Military Spore Concentration Reading Precision [%]",
+    Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_ConcentrationReading = "Concentration Reading Precision: Valutech Military Scanner [%]",
     Sandbox_TLOU_Spores_SporesScanner_ValutechMilitary_ConcentrationReading_tooltip = "Precision of the spore concentration reading given by the Valutech Military Scanner, expressed in percentage. The given value will be within a range of +/- the given percentage. Set to -1 to deactivate the spore concentration reading for this scanner.",
 
-    Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_ConcentrationReading = "Pharmahug Scientific Spore Concentration Reading Precision [%]",
+    Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_ConcentrationReading = "Concentration Reading Precision: Pharmahug Scientific Scanner [%]",
     Sandbox_TLOU_Spores_SporesScanner_PharmahugScientific_ConcentrationReading_tooltip = "Precision of the spore concentration reading given by the Pharmahug Scientific Scanner, expressed in percentage. The given value will be within a range of +/- the given percentage. Set to -1 to deactivate the spore concentration reading for this scanner.",
 }

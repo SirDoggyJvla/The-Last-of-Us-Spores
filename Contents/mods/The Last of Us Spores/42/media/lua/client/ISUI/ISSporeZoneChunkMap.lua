@@ -121,7 +121,7 @@ function ISSporeZoneChunkMap:prerender() -- Call before render, it's for harder 
 
     -- close UI if scanner is not charged
     local scanner = self.scanner
-    if not scanner:isActivated() or scanner:getCurrentUsesFloat() <= 0 then
+    if scanner and (not scanner:isActivated() or scanner:getCurrentUsesFloat() <= 0) then
         self:close()
     end
 end
@@ -174,7 +174,7 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
     local grid_x = limitedUserMode and grid_corner_UI.x or 25
     local grid_y = limitedUserMode and grid_corner_UI.y or BUTTON_HGT + UI_BORDER_SPACING
 
-    self.mapPanel = TLOU_Spores.GridMapSporeZone:new(grid_x, grid_y, uiSize, self.maxMapRange, limitedUserMode)
+    self.mapPanel = TLOU_Spores.GridMapSporeZone:new(grid_x, grid_y, uiSize, self.maxMapRange, limitedUserMode, self._sandboxOptions)
 	self.mapPanel:initialise();
 	self.mapPanel:instantiate();
 	self.mapPanel:setAnchorLeft(false);
@@ -190,7 +190,7 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
         self:addSlider("noiseThreshold","Noise threshold",x,y,0,1,0.1,0.1,TLOU_Spores.NOISE_SPORE_THRESHOLD,ISSporeZoneChunkMap.onNoiseThresholdSliderChange)
 
         --- NOISE SCALE SLIDER ---
-        self:addSlider("noiseScale","Noise scale",x,y + BUTTON_HGT + UI_BORDER_SPACING,0,100,1,1,TLOU_Spores.NOISE_MAP_SCALE,ISSporeZoneChunkMap.onNoiseScaleSliderChange)
+        self:addSlider("noiseScale",getText("Sandbox_TLOU_Spores_NoiseMapScale"),x,y + BUTTON_HGT + UI_BORDER_SPACING,0,100,1,1,TLOU_Spores.NOISE_MAP_SCALE,ISSporeZoneChunkMap.onNoiseScaleSliderChange)
 
         --- MINIMUM NOISE VECTOR VALUE SLIDER ---
         self:addSlider("minimumNoiseVectorValue","Minimum noise vector value",x,y + BUTTON_HGT*2 + UI_BORDER_SPACING*2,-5,5,1,1,TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,ISSporeZoneChunkMap.onMinimumNoiseVectorValueSliderChange)
@@ -251,7 +251,7 @@ function ISSporeZoneChunkMap:create() -- Use to make the elements
     end
 end
 
-function ISSporeZoneChunkMap:new(x, y, maxMapRange, limitedUserMode, scanner)
+function ISSporeZoneChunkMap:new(x, y, maxMapRange, limitedUserMode, scanner, _sandboxOptions)
     local width = 550
     local height = limitedUserMode and 550 or 700
 
@@ -314,6 +314,7 @@ function ISSporeZoneChunkMap:new(x, y, maxMapRange, limitedUserMode, scanner)
     o.maxMapRange = maxMapRange
     o.limitedUserMode = limitedUserMode
     o.scanner = scanner
+    o._sandboxOptions = _sandboxOptions
 
     if limitedUserMode then
         o.borderColor = {r=0.4, g=0.4, b=0.4, a=0}

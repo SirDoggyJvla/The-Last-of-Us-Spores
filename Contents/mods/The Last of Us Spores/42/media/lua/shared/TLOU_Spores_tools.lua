@@ -14,13 +14,14 @@ Tools file of TLOU Spores.
 --- CACHING
 -- module
 local TLOU_Spores = require "TLOU_Spores_module"
-local DoggyAPI = require "DoggyAPI_module"
-local DoggyAPI_NOISEMAP = DoggyAPI.NOISEMAP
-local DoggyAPI_FINDERS = DoggyAPI.FINDERS
-local DoggyAPI_WORLD = DoggyAPI.WORLD
+
+-- DoggyAPI
+local NoiseMap = require "DoggyTools/NoiseMap"
+local FindersTools = require "DoggyTools/FindersTools"
+local WorldTools = require "DoggyTools/WorldTools"
 
 -- timed actions
-require "TimedActions/ISScanForSporesConcentration"
+local ISScanForSporesConcentration = require "TimedActions/ISScanForSporesConcentration"
 
 -- random
 local GENERAL_RANDOM = newrandom()
@@ -47,7 +48,7 @@ TLOU_Spores.MapBuildingRooms = function(roomDefs)
         if not square or square:HasStairs() then break end
 
         -- get room ID
-        local roomID = DoggyAPI_WORLD.GetRoomID(roomDef)
+        local roomID = WorldTools.GetRoomID(roomDef)
 
         -- register the room
         table.insert(roomIDs,roomID)
@@ -110,7 +111,7 @@ TLOU_Spores.IsSquareSporeZone = function(square)
     if not roomDef then return false end
 
     -- get room ID
-    local roomID = DoggyAPI_WORLD.GetRoomID(roomDef)
+    local roomID = WorldTools.GetRoomID(roomDef)
     local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
 
     -- check if room has spores
@@ -124,12 +125,18 @@ end
 --[[ ================================================ ]]--
 
 ---Used to get the spore concentration of a chunk.
----@param chunk IsoChunk
----@return number
-TLOU_Spores.GetChunkSporeConcentration = function(chunk)
+---@param chunk IsoChunk|nil
+---@param chunkX integer|nil
+---@param chunkY integer|nil
+---@return number|nil
+TLOU_Spores.GetChunkSporeConcentration = function(chunk,chunkX,chunkY)
+    chunkX = chunkX or chunk and chunk.wx
+    chunkY = chunkY or chunk and chunk.wy
+    if not chunkX or not chunkY then return nil end
+
     -- get building spore map concentration
-    local noiseValue = DoggyAPI_NOISEMAP.getNoiseValue(
-        chunk.wx, chunk.wy,
+    local noiseValue = NoiseMap.getNoiseValue(
+        chunkX, chunkY,
         TLOU_Spores.NOISE_MAP_SCALE,
         TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE,TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE,
         SEEDS.x_seed,SEEDS.y_seed,SEEDS.offset_seed
@@ -142,29 +149,17 @@ TLOU_Spores.GetChunkSporeConcentration = function(chunk)
 end
 
 ---Used to get the spore concentration of a building.
----@param x_bID integer
----@param y_bID integer
----@param z_bID integer
+---@param buildingDef BuildingDef
 ---@return number|nil
-TLOU_Spores.GetBuildingSporeConcentration = function(x_bID,y_bID,z_bID)
-    local square = getSquare(x_bID,y_bID,z_bID)
-    if not square then return nil end
-    local chunk = square:getChunk()
-    local spore_concentration = TLOU_Spores.GetChunkSporeConcentration(chunk)
+TLOU_Spores.GetBuildingSporeConcentration = function(buildingDef)
+    local chunkX = buildingDef:getChunkX()
+    local chunkY = buildingDef:getChunkY()
+    local spore_concentration = TLOU_Spores.GetChunkSporeConcentration(nil,chunkX,chunkY)
 
     return spore_concentration
 end
 
----Used to roll for spore zones in the building based on the world noise map.
----@param buildingDef BuildingDef
----@param bID table
----@return boolean|nil
-TLOU_Spores.RollForSpores = function(buildingDef,bID)
-    -- get building spore map concentration
-    local spore_concentration = TLOU_Spores.GetBuildingSporeConcentration(bID.x_bID,bID.y_bID,bID.z_bID)
-    if not spore_concentration then return true end
-    if spore_concentration <= 0 then return end
-
+TLOU_Spores.GeneratedSpores = function(buildingDef,spore_concentration)
     -- get number of rooms
     local roomDefs = buildingDef:getRooms()
     local numberOf_rooms = roomDefs:size()
@@ -232,6 +227,7 @@ TLOU_Spores.RollForSpores = function(buildingDef,bID)
         table.insert(types,k)
     end
 
+    -- add spore tiles
     for roomID,coordinates in pairs(sporeRooms) do repeat
         local square = getSquare(coordinates.x,coordinates.y,coordinates.z)
         if not square then break end
@@ -267,7 +263,7 @@ TLOU_Spores.RollForSpores = function(buildingDef,bID)
                 local isoObject = IsoObject.new(getCell(), square, choiceTile)
                 square:AddTileObject(isoObject)
 
-                TLOU_Spores.DEBUG.AddHighlightSquare(square,{r=0,g=1,b=0,a=1})
+                -- TLOU_Spores.DEBUG.AddHighlightSquare(square,{r=0,g=1,b=0,a=1})
 
             elseif square:isWallSquare() then
                 if true then break end
@@ -280,16 +276,34 @@ TLOU_Spores.RollForSpores = function(buildingDef,bID)
                 local isoObject = IsoObject.new(getCell(), square, choiceTile)
                 square:AddTileObject(isoObject)
 
-                TLOU_Spores.DEBUG.AddHighlightSquare(square,{r=1,g=1,b=0,a=1})
+                -- TLOU_Spores.DEBUG.AddHighlightSquare(square,{r=1,g=1,b=0,a=1})
             end
         until true end
 
         for i = 1,10 do
             local wallSquare = isoRoom:getRandomWallSquare()
-            TLOU_Spores.DEBUG.AddHighlightSquare(wallSquare,{r=0,g=1,b=0,a=1})
+            -- TLOU_Spores.DEBUG.AddHighlightSquare(wallSquare,{r=0,g=1,b=0,a=1})
         end
 
     until true end
+end
+
+---Used to roll for spore zones in the building based on the world noise map.
+---@param buildingDef BuildingDef
+---@param spore_concentration number|nil --[optional]
+---@return boolean|nil
+TLOU_Spores.RollForSpores = function(buildingDef,spore_concentration)
+
+    if spore_concentration then
+        return TLOU_Spores.GeneratedSpores(buildingDef,spore_concentration)
+    end
+
+    -- get building spore map concentration
+    spore_concentration = TLOU_Spores.GetBuildingSporeConcentration(buildingDef)
+    if not spore_concentration then return true end
+    if spore_concentration <= 0 then return end
+
+    return TLOU_Spores.GeneratedSpores(buildingDef,spore_concentration)
 end
 
 ---Used to get the direction of the wall.
@@ -335,7 +349,7 @@ TLOU_Spores.CheckInSpores = function(character)
     local inSpores = false
     if roomDef then
         -- get room ID
-        local roomID = DoggyAPI_WORLD.GetRoomID(roomDef)
+        local roomID = WorldTools.GetRoomID(roomDef)
         local MODDATA_SPORES_ROOMS = ModData.getOrCreate("TLOU_Spores_rooms")
 
         -- check if room has spores
@@ -347,14 +361,10 @@ end
 
 ---Used to update the character in spores.
 ---@param character IsoGameCharacter
----@return boolean
+---@return boolean|nil
 ---@return nil
 TLOU_Spores.UpdateInSpores = function(character)
     local character_modData = character:getModData().TLOU_Spores
-    if not character_modData then
-        character:getModData().TLOU_Spores = {}
-        character_modData = character:getModData().TLOU_Spores
-    end
 
     -- check if in spores
     local inSporesPreviously = character_modData["inSpores"]
@@ -385,8 +395,7 @@ TLOU_Spores.CharacterIsInSpores = function(character,character_modData)
     local bodyDamage = character:getBodyDamage()
 
     -- verify if player's protection is enough
-    -- print(character:isProtectedFromToxic())
-    if character:getCorpseSicknessDefense() >= 100 or character:isProtectedFromToxic() then
+    if character:getCorpseSicknessDefense() >= 100 or character:isProtectedFromToxic() or character:isGodMod() then
         -- reset timer if present
         if character_modData["sporeTimer"] then
             character_modData["sporeTimer"] = nil
@@ -419,15 +428,15 @@ TLOU_Spores.CharacterIsInSpores = function(character,character_modData)
         bodyDamage:setTimeToSneezeOrCough(0)
     end
 
-    -- DEBUGING
-    if not character_modData["previousTime"] then
-        character_modData["previousTime"] = timeDelta
-    else
-        if character_modData["previousTime"] ~= timeDelta then
-            character_modData["previousTime"] = timeDelta
-            print("In spores: "..tostring(timeDelta))
-        end
-    end
+    -- -- DEBUGING: show time in spores
+    -- if not character_modData["previousTime"] then
+    --     character_modData["previousTime"] = timeDelta
+    -- else
+    --     if character_modData["previousTime"] ~= timeDelta then
+    --         character_modData["previousTime"] = timeDelta
+    --         print("In spores: "..tostring(timeDelta))
+    --     end
+    -- end
 
     return true, timeDelta
 end
@@ -437,7 +446,6 @@ end
 ---@param character_modData table
 ---@return boolean
 TLOU_Spores.CharacterEntersSpores = function(character,character_modData)
-    print("Enter spores")
     character_modData = character_modData or character:getModData().TLOU_Spores
 
     -- initialize in spores
@@ -459,7 +467,6 @@ end
 ---@return boolean
 ---@return nil
 TLOU_Spores.CharacterExitSpores = function(character,character_modData)
-    print("Exit spores")
     character_modData = character_modData or character:getModData().TLOU_Spores
 
     -- reinitialize in spores
@@ -514,6 +521,24 @@ end
 
 TLOU_Spores.ScanForSpores = function(ticks)
     local client_player = getPlayer()
+
+    -- get player coordinates
+    local p_x = client_player:getX()
+    local p_y = client_player:getY()
+    local p_z = client_player:getZ()
+
+    -- get min max chunk height
+    local chunk = client_player:getChunk()
+    if not chunk then return end
+    local min_h = math.max(chunk:getMinLevel(),p_z - 2) -- check max 2 levels below
+    local max_h = math.min(chunk:getMaxLevel(),p_z + 2) -- check max 2 levels above
+
+    local CIRCULAR_OUTWARD_DIRECTIONS = FindersTools.CIRCULAR_OUTWARD_DIRECTIONS
+
+    -- retrieve nearest spore zone square
+    local _,dist = FindersTools.FindNearestValidSquare(p_x,p_y,1,2,min_h,max_h,CIRCULAR_OUTWARD_DIRECTIONS,TLOU_Spores.IsSquareSporeZone)
+
+    client_player:getModData().TLOU_Spores["nearSpores"] = dist and dist - dist%1
 
     -- cache emitters
     local emitter = client_player:getEmitter()
@@ -580,20 +605,11 @@ TLOU_Spores.ScanForSpores = function(ticks)
     -- detection radius
     local radius = TLOU_Spores.SCANNERS_VALID_FOR_SPORE_DETECTION[scanner:getFullType()]
 
-    -- get player coordinates
-    local p_x = client_player:getX()
-    local p_y = client_player:getY()
-    local p_z = client_player:getZ()
-
-    -- makes sure the code doesn't do weird shit when at the world height limit
-    -- to check a floor above and below
-    local min_h = p_z - 1
-    min_h = min_h < 0 and 0 or min_h > 7 and 7 or min_h
-    local max_h = p_z + 1
-    max_h = max_h < 0 and 0 or max_h > 7 and 7 or max_h
-
     -- retrieve nearest spore zone square
-    local _,dist = DoggyAPI_FINDERS.FindNearestValidSquare(p_x,p_y,1,radius,min_h,max_h,DoggyAPI_FINDERS.CIRCULAR_OUTWARD_DIRECTIONS,TLOU_Spores.IsSquareSporeZone)
+    -- either precedent check or a new wider one
+    if not dist then
+        _,dist = FindersTools.FindNearestValidSquare(p_x,p_y,3,radius,min_h,max_h,CIRCULAR_OUTWARD_DIRECTIONS,TLOU_Spores.IsSquareSporeZone)
+    end
 
     -- check if something is detected
     if dist then

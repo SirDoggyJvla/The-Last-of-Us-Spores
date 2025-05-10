@@ -12,6 +12,9 @@ Module of TLOU Spores.
 --[[ ================================================ ]]--
 
 local TLOU_Spores = {
+    --- CONFIGS ---
+    CONFIGS = {}, -- will be populated by the mod options
+
     --- CHUNKS ---
     SQUARE_SKIP_DISTANCE = 4,
 
@@ -169,8 +172,109 @@ local TLOU_Spores = {
     MINIMUM_NOISE_VECTOR_VALUE = -5,
     MAXIMUM_NOISE_VECTOR_VALUE = 5,
 
+    --- MAP GENERATION ---
+    CHECK_COORDINATES = {},
+
     --- PLAYER STATE ---
     PLAYER_STATE = {},
+
+    --- SPORE OVERLAY ---
+    OVERLAY_OPTIONS = {
+        ["yellow"] = {
+            main_path = "media/ui/SporeOverlay/yellow/SporeOverlay_main_yellow.png",
+            particles_big = {
+                path = "media/ui/SporeOverlay/yellow/SporeOverlay_particles_yellow_big_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*1,
+                omega_y = math.pi*0.5,
+                amplitude = 3,
+            },
+            particles_medium = {
+                path = "media/ui/SporeOverlay/yellow/SporeOverlay_particles_yellow_medium_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*2,
+                omega_y = math.pi*1.5,
+                amplitude = 6,
+            },
+            particles_small = {
+                path = "media/ui/SporeOverlay/yellow/SporeOverlay_particles_yellow_small_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*3,
+                omega_y = math.pi*2.5,
+                amplitude = 10,
+            },
+            particles_medium_fliped = {
+                path = "media/ui/SporeOverlay/yellow/SporeOverlay_particles_yellow_medium_fliped_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*2,
+                omega_y = math.pi*1.5,
+                amplitude = 6,
+            },
+            particles_small_fliped = {
+                path = "media/ui/SporeOverlay/yellow/SporeOverlay_particles_yellow_small_fliped_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*3,
+                omega_y = math.pi*2.5,
+                amplitude = 10,
+            },
+        },
+        ["white"] = {
+            main_path = "media/ui/SporeOverlay/white/SporeOverlay_main_white.png",
+            particles_big = {
+                path = "media/ui/SporeOverlay/white/SporeOverlay_particles_white_big_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*1,
+                omega_y = math.pi*0.5,
+                amplitude = 3,
+            },
+            particles_medium = {
+                path = "media/ui/SporeOverlay/white/SporeOverlay_particles_white_medium_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*2,
+                omega_y = math.pi*1.5,
+                amplitude = 6,
+            },
+            particles_small = {
+                path = "media/ui/SporeOverlay/white/SporeOverlay_particles_white_small_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*3,
+                omega_y = math.pi*2.5,
+                amplitude = 10,
+            },
+            particles_medium_fliped = {
+                path = "media/ui/SporeOverlay/white/SporeOverlay_particles_white_medium_fliped_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*2,
+                omega_y = math.pi*1.5,
+                amplitude = 6,
+            },
+            particles_small_fliped = {
+                path = "media/ui/SporeOverlay/white/SporeOverlay_particles_white_small_fliped_%d.png",
+                limitMin = 0.5,
+                limitMax = 1,
+                omega_x = math.pi*3,
+                omega_y = math.pi*2.5,
+                amplitude = 10,
+            },
+        },
+    },
+    PARTICLE_LAYERS = table.newarray({
+        "particles_big",
+        "particles_medium",
+        "particles_small",
+        "particles_medium_fliped",
+        "particles_small_fliped",
+    }),
+
 
     --- DEBUGING ---
     DEBUG = {
@@ -179,9 +283,33 @@ local TLOU_Spores = {
 }
 
 -- add battery handling for every scanners, done here in-case other outside scanners are added
-local BatteryHandler = require "DoggyTools/DoggyAPI_BatteryHandler"
+local BatteryHandler = require "DoggyTools/BatteryHandler"
 for scannerFullType, _ in pairs(TLOU_Spores.SCANNERS_ITEMS) do
     BatteryHandler.AddBatteryItem(scannerFullType)
 end
+
+
+
+--[[ ================================================ ]]--
+--- LOADING CHUNK ---
+--[[ ================================================ ]]--
+
+---Whenever a new chunk gets loaded in
+---@param chunk any
+TLOU_Spores.LoadNewChunk = function(chunk)
+    -- check 4 squares in the chunk, which should be more than enough to catch any building
+    local SQUARE_SKIP_DISTANCE = TLOU_Spores.SQUARE_SKIP_DISTANCE
+    local CHUNK_MIN_LEVEL,CHUNK_MAX_LEVEL = chunk:getMinLevel(),chunk:getMaxLevel()
+    local CHECK_COORDINATES = TLOU_Spores.CHECK_COORDINATES
+    for i_x = 0, 7, SQUARE_SKIP_DISTANCE do
+        for i_y = 0, 7, SQUARE_SKIP_DISTANCE do
+            for i_z = CHUNK_MIN_LEVEL, CHUNK_MAX_LEVEL do
+                table.insert(CHECK_COORDINATES, {chunk=chunk,x=i_x,y=i_y,z=i_z})
+            end
+        end
+    end
+end
+
+
 
 return TLOU_Spores

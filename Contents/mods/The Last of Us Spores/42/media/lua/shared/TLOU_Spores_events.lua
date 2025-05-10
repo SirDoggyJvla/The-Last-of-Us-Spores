@@ -14,10 +14,7 @@ Events of TLOU Spores.
 -- module
 local TLOU_Spores = require "TLOU_Spores_module"
 require "TLOU_Spores"
-
--- custom events
-local DoggyAPI = require "DoggyAPI_module"
-local EVENTS = DoggyAPI.EVENTS
+require "TLOU_Spores_UI"
 
 -- game starting
 Events.OnInitGlobalModData.Add(TLOU_Spores.OnInitGlobalModData)
@@ -28,15 +25,21 @@ Events.OnSave.Add(TLOU_Spores.OnSave)
 -- new save
 Events.OnNewGame.Add(TLOU_Spores.OnNewGame)
 
+-- new character created
+Events.OnCreatePlayer.Add(TLOU_Spores.OnCreatePlayer)
+
 -- new chunk getting loaded in
-require "DoggyEvents/DoggyAPI_LoadNewChunk"
-EVENTS.LoadNewChunk:addListener(TLOU_Spores.LoadNewChunk)
+local LoadNewChunk = require "DoggyEvents/LoadNewChunk"
+LoadNewChunk.Event:addListener(TLOU_Spores.LoadNewChunk)
 
 -- every ticks
 Events.OnTick.Add(TLOU_Spores.OnTick)
 
 -- clicking scanner
 Events.OnFillInventoryObjectContextMenu.Add(TLOU_Spores.OnFillInventoryObjectContextMenu)
+
+-- UI handler
+Events.OnPreUIDraw.Add(TLOU_Spores.OnPreUIDraw)
 
 if isDebugEnabled() then
     -- debug

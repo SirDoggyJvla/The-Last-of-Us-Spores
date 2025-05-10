@@ -15,15 +15,19 @@ Core file of TLOU Spores.
 -- module
 local TLOU_Spores = require "TLOU_Spores_module"
 require "TLOU_Spores_tools"
-local DoggyAPI = require "DoggyAPI_module"
-local DoggyAPI_WORLD = DoggyAPI.WORLD
 
--- coordinates to check
-local CHECK_COORDINATES = {}
+-- DoggyAPI
+local WorldTools = require "DoggyTools/WorldTools"
 
 -- game loaded caching
 local MODDATA_SPORES_BUILDINGS
 local MODDATA_SPORES_SEEDS
+
+
+
+--[[ ================================================ ]]--
+--- INITIALIZING WORLD ---
+--[[ ================================================ ]]--
 
 ---Used to cache some stuff on startup
 TLOU_Spores.OnInitGlobalModData = function()
@@ -45,7 +49,10 @@ TLOU_Spores.OnInitGlobalModData = function()
     local scale = SandboxVars.TLOU_Spores.NoiseMapScale/8
     scale = scale - scale%1 -- no point having a float
     TLOU_Spores.NOISE_MAP_SCALE = scale
-
+    TLOU_Spores.NOISE_SPORE_THRESHOLD = SandboxVars.TLOU_Spores.SporeConcentrationThreshold/100
+    TLOU_Spores.MINIMUM_PERCENTAGE_OF_ROOMS_WITH_SPORES = SandboxVars.TLOU_Spores.MinimumPercentageOfRoomsWithSpores/100
+    TLOU_Spores.MINIMUM_NOISE_VECTOR_VALUE = SandboxVars.TLOU_Spores.MinimumNoiseVectorValue
+    TLOU_Spores.MAXIMUM_NOISE_VECTOR_VALUE = SandboxVars.TLOU_Spores.MaximumNoiseVectorValue
 
     --- SANDBOX OPTIONS
 
@@ -73,7 +80,7 @@ TLOU_Spores.OnInitGlobalModData = function()
 end
 
 TLOU_Spores.OnSave = function()
-    CHECK_COORDINATES = {}
+    TLOU_Spores.CHECK_COORDINATES = {}
 end
 
 ---Used to initialize the seeds for this map, either by user input or randomness.
@@ -101,25 +108,11 @@ TLOU_Spores.OnNewGame = function()
 end
 
 
-
---[[ ================================================ ]]--
---- LOADING CHUNK ---
---[[ ================================================ ]]--
-
----Whenever a new chunk gets loaded in
----@param chunk any
-TLOU_Spores.LoadNewChunk = function(chunk)
-    -- check 4 squares in the chunk, which should be more than enough to catch any building
-    local SQUARE_SKIP_DISTANCE = TLOU_Spores.SQUARE_SKIP_DISTANCE
-    local CHUNK_MIN_LEVEL,CHUNK_MAX_LEVEL = chunk:getMinLevel(),chunk:getMaxLevel()
-    for i_x = 0, 7, SQUARE_SKIP_DISTANCE do
-        for i_y = 0, 7, SQUARE_SKIP_DISTANCE do
-            for i_z = CHUNK_MIN_LEVEL, CHUNK_MAX_LEVEL do
-                table.insert(CHECK_COORDINATES, {chunk=chunk,x=i_x,y=i_y,z=i_z})
-            end
-        end
-    end
+TLOU_Spores.OnCreatePlayer = function(playerID)
+    local player = getSpecificPlayer(playerID)
+    player:getModData().TLOU_Spores = player:getModData().TLOU_Spores or {}
 end
+
 
 TLOU_Spores.OnTick = function(ticks)
     -- update player in spore zone status
@@ -134,6 +127,7 @@ TLOU_Spores.OnTick = function(ticks)
     TLOU_Spores.ScanForSpores(ticks)
 
     -- no coordinates to check
+    local CHECK_COORDINATES = TLOU_Spores.CHECK_COORDINATES
     if #CHECK_COORDINATES == 0 then return end
 
     -- next square to check
@@ -157,12 +151,11 @@ TLOU_Spores.OnTick = function(ticks)
 
         -- check if building was generated for spores
         buildingDef = building:getDef()
-        local x_bID,y_bID,z_bID = DoggyAPI_WORLD.getBuildingID(buildingDef)
-        local buildingID = x_bID.."x"..y_bID.."x"..z_bID
+        local buildingID = WorldTools.getBuildingID(buildingDef)
         if MODDATA_SPORES_BUILDINGS[buildingID] then break end
 
         -- we verify the building was successfully identified, if not it needs to be checked later
-        wrongInitialization = TLOU_Spores.RollForSpores(buildingDef,{x_bID = x_bID,y_bID = y_bID,z_bID = z_bID,buildingID = buildingID})
+        wrongInitialization = TLOU_Spores.RollForSpores(buildingDef)
         MODDATA_SPORES_BUILDINGS[buildingID] = wrongInitialization
     until true
 
